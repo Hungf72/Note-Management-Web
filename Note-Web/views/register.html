@@ -25,12 +25,12 @@
 
                 <div class="text-center">
                     <a href="register.html">
-                        <img src="images/noteImage.png" alt="Note App Logo">
+                        <img src="/Note-Management-Web/Note-Web/images/noteImage.png" alt="Note App Logo">
                     </a>
                 </div>
 
                 <h3 class="card-title text-center mb-4">Create Account</h3>
-                <form id="registerForm" method="post" action="register.php">
+                <form id="registerForm" method="post" action="/Note-Management-Web/Note-Web/controllers/register.php">
 
                     <div class="form-row">
                         <div class="form-group col-md-6">
@@ -123,7 +123,7 @@
 
         const formData = new FormData(this);
 
-        fetch("register.php", {
+        fetch("/Note-Management-Web/Note-Web/controllers/register.php", {
             method: "POST",
             body: formData
         })
