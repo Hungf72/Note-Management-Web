@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+  <title>Note App - Register</title>
+  <style>
+    img{
+        width: 30%;
+    }
+
+    label,h4{
+        font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card p-4 shadow">
+            <div class="card-body">
+
+                <div class="text-center">
+                    <a href="register.html">
+                        <img src="images/noteImage.png" alt="Note App Logo">
+                    </a>
+                </div>
+
+                <h3 class="card-title text-center mb-4">Create Account</h3>
+                <form id="registerForm" method="post" action="register.php">
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                        <label for="lastname">Họ</label>
+                        <input name="lastname" type="text" class="form-control" id="lastname" placeholder="Nguyễn" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                        <label for="firstname">Tên</label>
+                        <input name="firstname" type="text" class="form-control" id="firstname" placeholder="Văn A" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Tuổi</label>
+                        <input name="age" type="number" class="form-control" id="age" placeholder="Tuổi" min="1" max="100" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại</label>
+                        <input name="phone" type="tel" class="form-control" id="phone" placeholder="0901234567" pattern="[0-9]{10,11}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                        <input name="email" type="email" class="form-control" id="email" placeholder="example@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password"><i class="fas fa-lock"></i> Mật khẩu</label>
+                        <div class="input-group">
+                            <input name="password" type="password" class="form-control" id="password" placeholder="Tạo mật khẩu" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword"><i class="fas fa-lock"></i> Xác nhận mật khẩu</label>
+                        <div class="input-group">
+                            <input name="confirm_password" type="password" class="form-control" id="confirmPassword" placeholder="Nhập lại mật khẩu" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                    <i class="fas fa-eye" id="toggleConfirmIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-block">
+                    <i class="fas fa-user-plus"></i> Đăng ký
+                    </button>
+
+                    <div class="text-center mt-3">
+                    <small>Đã có tài khoản? <a href="login.html">Đăng nhập</a></small>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- message dialog -->
+    <div class="modal fade" id="message-dialog">
+        <div class="modal-dialog">
+           <div class="modal-content">
+                <div class="modal-header justify-content-center">
+                    <h4 class="modal-title text-center">Thông báo</h4>
+                </div>
+    
+                <div class="modal-body">
+                    <!-- hien thong bao o day -->
+                    <p id="modalMessage"></p>
+                </div>
+            
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Đóng</button>
+                </div>            
+           </div>
+        </div>
+    </div>
+  
+
+  <script>
+    
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch("register.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("modalMessage").textContent = data.message;
+            $('#message-dialog').modal('show');
+
+            if (data.status === "success") {
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            document.getElementById("modalMessage").textContent = "Đã xảy ra lỗi!";
+            $('#message-dialog').modal('show');
+        });
+    });
+
+    document.getElementById("togglePassword").addEventListener("click", function () {
+      const pwd = document.getElementById("password");
+      const icon = document.getElementById("toggleIcon");
+      pwd.type = pwd.type === "password" ? "text" : "password";
+      icon.classList.toggle("fa-eye");
+      icon.classList.toggle("fa-eye-slash");
+    });
+
+    document.getElementById("toggleConfirmPassword").addEventListener("click", function () {
+      const pwd = document.getElementById("confirmPassword");
+      const icon = document.getElementById("toggleConfirmIcon");
+      pwd.type = pwd.type === "password" ? "text" : "password";
+      icon.classList.toggle("fa-eye");
+      icon.classList.toggle("fa-eye-slash");
+    });
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+</body>
+</html>
