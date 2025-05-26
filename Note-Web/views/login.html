@@ -27,13 +27,13 @@
 
                 <div class="text-center">
                     <a href="login.html">
-                        <img src="images/noteImage.png" alt="Note Logo">
+                        <img src="/Note-Management-Web/Note-Web/images/noteImage.png" alt="Note Logo">
                     </a>
                 </div>
 
                 <h3 class="card-title text-center">Note App</h3>
                 <h5 class="text-center text-muted mb-4">Think it, Login account and Do it</h5>
-                <form id="loginForm" method="post" action="login.php">
+                <form id="loginForm" method="post" action="/Note-Management-Web/Note-Web/controllers/login.php">
 
                     <div class="form-group">
                         <label for="email"><i class="fas fa-envelope"></i> Email</label>
@@ -100,7 +100,7 @@
 
             const formData = new FormData(this);
 
-            fetch("login.php", {
+            fetch("/Note-Management-Web/Note-Web/controllers/login.php", {
                 method: "POST",
                 body: formData
             })
