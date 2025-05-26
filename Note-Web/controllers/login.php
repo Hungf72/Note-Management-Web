@@ -16,6 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($password, $user['password'])) {
             $_SESSION['user'] = $user;
+
+            // neu bat remember me thi luu cookie trong 1 ngay
+            if (!empty($_POST['rememberMe'])) {
+                setcookie('user_email', $email, time() + 86400, "/");
+            } else {
+                if (isset($_COOKIE['user_email'])) {
+                    setcookie('user_email', '', time() - 3600, "/");
+                }
+            }
+
             echo json_encode(['status' => 'success', 'message' => 'Đăng nhập thành công']);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Email hoặc mật khẩu không đúng.']);
@@ -25,5 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     exit;
 } 
+?> 
 
-?>
+
+
