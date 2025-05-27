@@ -18,6 +18,7 @@ create table notes (
     content text not null,
     created_at timestamp default CURRENT_TIMESTAMP,
     last_modified timestamp default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+    note_password varchar(255) not null,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -29,4 +30,6 @@ create table labels (
     PRIMARY KEY (note_id, label_id),
     FOREIGN KEY (note_id) REFERENCES notes(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
+    alter table notes add COLUMN is_pinned boolean default FALSE;
+    alter table notes add COLUMN pinned_order int default null;
 );
