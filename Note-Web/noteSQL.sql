@@ -11,12 +11,22 @@ create table Users(
     password varchar(255) not null
 )
 
-CREATE TABLE IF NOT EXISTS notes (
+create table notes (
     id int primary key AUTO_INCREMENT,
     user_id int not null,
     title varchar(255) not null,
     content text not null,
     created_at timestamp default CURRENT_TIMESTAMP,
     last_modified timestamp default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+create table labels (
+    id int primary key AUTO_INCREMENT,
+    note_id int not null,
+    user_id int not null,
+    name varchar(255) not null,
+    PRIMARY KEY (note_id, label_id),
+    FOREIGN KEY (note_id) REFERENCES notes(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
