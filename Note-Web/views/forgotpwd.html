@@ -12,6 +12,7 @@
         <div class="card shadow p-4" style="min-width: 350px;">
             <div class="card-body">
                 <h4 class="card-title text-center mb-4">Forgot Password</h4>
+
                 <form id="forgotForm">
 
                     <div class="form-group">
@@ -24,30 +25,6 @@
                         <input type="confirmCode" class="form-control" id="confirmCode" name="confirmCode">
                     </div>
 
-                    <div id="creatPwd" class="form-group" style="display: none;">
-                        <label for="password"><i class="fas fa-lock"></i> Mật khẩu</label>
-                        <div class="input-group">
-                            <input name="password" type="password" class="form-control" id="password" placeholder="Đặt lại mật khẩu">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                    <i class="fas fa-eye" id="toggleIcon"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="confirmPwd" class="form-group" style="display: none;">
-                        <label for="confirmPassword"><i class="fas fa-lock"></i> Xác nhận mật khẩu</label>
-                        <div class="input-group">
-                            <input name="confirm_password" type="password" class="form-control" id="confirmPassword" placeholder="Nhập lại mật khẩu">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
-                                    <i class="fas fa-eye" id="toggleConfirmIcon"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
                     <div id="btnSendLink">
                         <button type="submit" class="btn btn-primary btn-block">
                             <i class="fas fa-paper-plane"></i> Send Reset Link
@@ -57,6 +34,48 @@
                     <div id="btnVerify" style="display: none;">
                         <button type="button" class="btn btn-primary btn-block mt-2" id="verifyCodeBtn">
                             <i class="fas fa-check"></i> Verify Code
+                        </button>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="login.html">Back to login</a>
+                    </div>
+                </form>
+
+                <form id="resetForm" style="display: none;">
+
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Enter your email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="example@gmail.com" required>
+                    </div>
+
+                    <div id="createPwd" class="form-group">
+                        <label for="password"><i class="fas fa-lock"></i> Reset Password</label>
+                        <div class="input-group">
+                            <input name="password" type="password" class="form-control" id="password" placeholder="Đặt lại mật khẩu" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="confirmPwd" class="form-group">
+                        <label for="confirmPassword"><i class="fas fa-lock"></i> Confirm Password</label>
+                        <div class="input-group">
+                            <input name="confirm_password" type="password" class="form-control" id="confirmPassword" placeholder="Nhập lại mật khẩu" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                    <i class="fas fa-eye" id="toggleConfirmIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="btnSignUp">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-user-plus"></i> Confirm
                         </button>
                     </div>
 
@@ -92,7 +111,7 @@
     <script>
         let generatedCode = null;
 
-        // Gửi yêu cầu mã xác nhận
+        // gui ma yeu cau
         document.getElementById('forgotForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -116,8 +135,9 @@
 
                     document.getElementById("confirmMessage").style.display = 'block';
                     document.getElementById("btnVerify").style.display = 'block';
-
                     document.getElementById("btnSendLink").style.display = 'none';
+
+                    document.getElementById("email").readOnly = true;
                 } 
                 else{
                     modalMessage.innerHTML = `<span class="text-danger">${data.message}</span>`;
@@ -132,20 +152,90 @@
             });
         });
 
-        // Kiểm tra mã xác nhận
+        //kiem tra ma xac nhan
         document.getElementById('verifyCodeBtn').addEventListener('click', function () {
             const enteredCode = document.getElementById('confirmCode').value.trim();
             const modalMessage = document.getElementById('modalMessage');
 
             if (enteredCode === generatedCode) {
                 modalMessage.innerHTML = `<span class="text-success">✅ Mã xác nhận đúng! Bạn có thể tiếp tục đặt lại mật khẩu.</span>`;
+
+                document.getElementById("forgotForm").style.display = "none";
+                document.getElementById("resetForm").style.display = "block";
+
+                const email = document.getElementById('email').value;
+                document.querySelector('#resetForm #email').value = email;
+
+                document.querySelector('#resetForm #email').readOnly = true;
             } 
-            else {
+            else{
                 modalMessage.innerHTML = `<span class="text-danger">❌ Mã xác nhận không đúng. Vui lòng kiểm tra lại.</span>`;
             }
 
             $('#message-dialog').modal('show');
         });
+
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const pwd = document.getElementById("password");
+            const icon = document.getElementById("toggleIcon");
+            pwd.type = pwd.type === "password" ? "text" : "password";
+            icon.classList.toggle("fa-eye");
+            icon.classList.toggle("fa-eye-slash");
+        });
+
+        document.getElementById("toggleConfirmPassword").addEventListener("click", function () {
+            const pwd = document.getElementById("confirmPassword");
+            const icon = document.getElementById("toggleConfirmIcon");
+            pwd.type = pwd.type === "password" ? "text" : "password";
+            icon.classList.toggle("fa-eye");
+            icon.classList.toggle("fa-eye-slash");
+        });
+
+        // thay doi mat khau
+        document.getElementById("resetForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const email = this.querySelector("#email").value.trim();
+            const password = this.querySelector("#password").value.trim();
+            const confirmPassword = this.querySelector("#confirmPassword").value.trim();
+            const modalMessage = document.getElementById('modalMessage');
+
+            if (password !== confirmPassword) {
+                modalMessage.innerHTML = '<span class="text-danger">❌ Mật khẩu xác nhận không khớp.</span>';
+                $('#message-dialog').modal('show');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+
+            fetch('/Note-Management-Web/Note-Web/controllers/updatepwd.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    modalMessage.innerHTML = `<span class="text-success">${data.message}</span>`;
+                   
+                    setTimeout(() => {
+                        window.location.href = "login.html";
+                    }, 1000);
+                } 
+                else {
+                    modalMessage.innerHTML = `<span class="text-danger">${data.message}</span>`;
+                }
+
+                $('#message-dialog').modal('show');
+            })
+            .catch(err => {
+                console.error('Lỗi:', err);
+                modalMessage.innerHTML = '<span class="text-danger">Đã xảy ra lỗi khi cập nhật mật khẩu.</span>';
+                $('#message-dialog').modal('show');
+            });
+        });
+
     </script>
 
     <!-- library -->
