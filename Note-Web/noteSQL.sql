@@ -30,6 +30,6 @@ create table labels (
     PRIMARY KEY (note_id, label_id),
     FOREIGN KEY (note_id) REFERENCES notes(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
-    alter table notes add COLUMN is_pinned boolean default FALSE;
-    alter table notes add COLUMN pinned_order int default null;
+    alter table notes add column is_pinned boolean default false;
+    alter table notes add column pinned_order int default null;
 );
