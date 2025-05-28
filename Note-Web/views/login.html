@@ -111,6 +111,7 @@
                 $('#message-dialog').modal('show');
 
                 if (data.status === "success") {
+                    localStorage.setItem('email',data.email);
                     setTimeout(() => {
                         window.location.href = "home.html";
                     }, 1000);
