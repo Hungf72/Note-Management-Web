@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Note App - Account Activation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+</head>
+<body class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+
+    <div class="text-center">
+        <div id="result" class="alert alert-info">Verifying...</div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const email = params.get('email');
+
+        fetch(`/Note-Management-Web/Note-Web/controllers/activate.php?email=${encodeURIComponent(email)}`, {
+            method: 'GET'
+        })
+        .then(res => res.json())
+        .then(data => {
+            const result = document.getElementById('result');
+    
+            if (data.status === 'success') {
+                result.className = 'alert alert-success';
+                result.textContent = data.message;
+
+                localStorage.setItem('is_activated', 'true');
+                localStorage.removeItem('activation_link');
+
+                setTimeout(() => {
+                    window.location.href = "home.html";
+                }, 1000);
+            } 
+            else {
+                result.className = 'alert alert-danger';
+                result.textContent = data.message;
+            }
+        })
+    </script>
+
+</body>
+</html>
