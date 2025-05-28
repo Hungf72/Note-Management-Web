@@ -8,7 +8,8 @@ create table Users(
     age int not null,
     phone varchar(15) not null,
     email varchar(100) not null unique,
-    password varchar(255) not null
+    password varchar(255) not null,
+    is_active TINYINT(1) NOT NULL DEFAULT 0
 )
 
 create table notes (
