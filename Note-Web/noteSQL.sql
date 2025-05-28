@@ -24,13 +24,14 @@ create table notes (
 );
 
 create table labels (
-    id int primary key AUTO_INCREMENT,
+    label_id int primary key AUTO_INCREMENT,
     note_id int not null,
     user_id int not null,
     name varchar(255) not null,
     PRIMARY KEY (note_id, label_id),
     FOREIGN KEY (note_id) REFERENCES notes(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
-    alter table notes add column is_pinned boolean default false;
-    alter table notes add column pinned_order int default null;
 );
+
+alter table notes add column is_pinned boolean default false;
+alter table notes add column pinned_order int default null;
