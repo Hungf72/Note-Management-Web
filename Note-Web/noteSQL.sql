@@ -10,7 +10,7 @@ create table Users(
     email varchar(100) not null unique,
     password varchar(255) not null,
     is_active TINYINT(1) NOT NULL DEFAULT 0
-)
+);
 
 create table notes (
     id int primary key AUTO_INCREMENT,
