@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
-  <title>Note App - Register</title>
+  <title>Note App - Sign Up</title>
   <style>
     img{
         width: 30%;
@@ -132,8 +132,10 @@
             $('#message-dialog').modal('show');
 
             if (data.status === "success") {
+                localStorage.setItem('activation_link', data.activation_link);
+                localStorage.setItem('email',data.email);
                 setTimeout(() => {
-                    window.location.href = "login.html";
+                    window.location.href = "home.html";
                 }, 1000);
             }
         })
