@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            echo json_encode(['status' => 'success', 'message' => 'Đăng nhập thành công']);
+            echo json_encode(['status' => 'success', 'message' => 'Đăng nhập thành công', 'email' => $email]);
         } 
         else{
             echo json_encode(['status' => 'error', 'message' => 'Email hoặc mật khẩu không đúng.']);
