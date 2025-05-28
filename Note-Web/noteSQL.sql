@@ -1,5 +1,5 @@
-create database NoteApp
-use NoteApp
+create database NoteApp;
+use NoteApp;
 
 create table Users(
     id int AUTO_INCREMENT primary key,
