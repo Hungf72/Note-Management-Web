@@ -4,19 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Note App - Home Page</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-    <title>Note App - Home</title>
+    <style>
+        body {
+        min-height: 100vh;
+        display: flex;
+        }
+
+        .sidebar {
+        min-width: 220px;
+        max-width: 220px;
+        background-color: #343a40;
+        color: #fff;
+        padding-top: 20px;
+        }
+
+        .sidebar a {
+        color: #fff;
+        display: block;
+        padding: 10px 20px;
+        text-decoration: none;
+        }
+
+        .sidebar a:hover {
+        background-color: #495057;
+        }
+
+        .main-content {
+        flex-grow: 1;
+        padding: 20px;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>This is HomePage</h1>
-    <h2>Hello Huy</h2>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4 class="text-center mb-4">Note App</h4>
+        <a href="#"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="#"><i class="fas fa-sticky-note"></i> Notes</a>
+        <a href="#"><i class="fas fa-cog"></i> Settings</a>
+        <a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <div class="alert alert-info mt-3" id="activationMsg" style="display: none;"></div>
+
+        <h1>Welcome to your Note App!</h1>
+        <p>This is the home page where you can manage your notes.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+        const email = localStorage.getItem('email');
+
+        if (!email) {
+            console.log('Chưa có email để kiểm tra kích hoạt.');
+            return;
+        }
+
+        alert(email)
+
+        fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(email)}`, {
+            method: 'GET'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (!data.is_active) {
+                    const link = localStorage.getItem('activation_link'); // <-- thêm dòng này
+                    const msgBox = document.getElementById('activationMsg');
+                    msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
+                    msgBox.style.display = 'block';
+                }
+            } 
+            else{
+                console.error('Lỗi server:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi kết nối:', error);
+        });
+    });
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
 </body>
 </html>
+
+<!-- if (link && isActivated !== 'true') {
+                const msgBox = document.getElementById('activationMsg');
+                msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
+                msgBox.style.display = 'block';
+            } -->
