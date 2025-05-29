@@ -129,4 +129,30 @@
         }
     }
 
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        getNOTES();
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $action = $_POST['action'] ?? '';
+        switch ($action) {
+            case 'create':
+                createNOTES();
+                break;
+            case 'delete':
+                deleteNOTES();
+                break;
+            case 'update':
+                updateNOTES();
+                break;
+            case 'autosave':
+                autoSaveNOTES();
+                break;
+            default:
+                echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
+                exit;
+        }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Unsupported request method']);
+        exit;
+    }
+    ?>
 ?>
