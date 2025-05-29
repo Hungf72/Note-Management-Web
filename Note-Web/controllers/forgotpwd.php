@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
 
     if (empty($email)) {
-        echo json_encode(['status' => 'error', 'message' => 'Email không được để trống.']);
+        echo json_encode(['status' => 'error', 'message' => 'Email could not be empty.']);
         exit;
     }
 
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // tao ma sac nhan 
         $ecode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        echo json_encode(['status' => 'success', 'message' => 'Mã xác nhận của bạn là:', 'ecode' => $ecode]);
+        echo json_encode(['status' => 'success', 'message' => 'Your confirm code is:', 'ecode' => $ecode]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy tài khoản với email này.']);
     }
