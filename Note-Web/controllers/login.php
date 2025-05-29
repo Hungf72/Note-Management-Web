@@ -1,6 +1,5 @@
 <?php
 session_start();
-// duong dan tuyet doi
 require_once __DIR__ . '/../models/connect.php';
 
 header('Content-Type: application/json');
