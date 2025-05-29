@@ -69,7 +69,7 @@
                     </div>
                     <div class="form-group">
                         <label for="noteContent">Content</label>
-                        <textarea class="form-control" id="noteContent" rows="3" required></textarea>
+                        <textarea class="form-control" id="noteContent" rows="3"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Create Note</button>
                 </form>
@@ -182,9 +182,10 @@
                     <div class="card-body" style="max-width: 50%;">
                         <h5 class="card-title">${note.title}</h5>
                         <p class="card-text">${note.content}</p>
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
                             <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
-                            <button class="btn btn-sm btn-danger delete-btn" data-id="${note.id}">Delete</button>
+                            <button class="btn btn-sm btn-primary edit-btn pl-3 pr-3 ml-3" data-id="${note.id}">Edit</button>
+                            <button class="btn btn-sm btn-danger delete-btn pl-3 pr-3 ml-3" data-id="${note.id}">Delete</button>
                         </div>
                     </div>
                 `;
