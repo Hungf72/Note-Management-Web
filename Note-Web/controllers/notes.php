@@ -76,28 +76,31 @@
 
     function editNOTES($noteId){
         global $pdo;
-        if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-            $userId = $_SESSION['user']['id'] ?? null;
+        $userId = $_SESSION['user']['id'] ?? null;
 
-            if (!$userId) {
-                echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để cập nhật note.']);
-                exit;
-            }
-
-            if (!$noteId) {
-                echo json_encode(['status' => 'error', 'message' => 'ID note không hợp lệ.']);
-                exit;
-            }
-
-            try {
-                $stmt = $pdo->prepare("SELECT * FROM notes WHERE id = :id AND user_id = :user_id");
-                $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
-                echo json_encode(['status' => 'success', 'message' => 'Note đã được cập nhật thành công.']);
-            } catch (PDOException $e) {
-                echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
-            }
+        if (!$userId) {
+            echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để xem note.']);
             exit;
         }
+
+        if (!$noteId) {
+            echo json_encode(['status' => 'error', 'message' => 'ID note không hợp lệ.']);
+            exit;
+        }
+
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM notes WHERE id = :id AND user_id = :user_id");
+            $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
+            $note = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($note) {
+                echo json_encode(['status' => 'success', 'note' => $note]);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy note.']);
+            }
+        } catch (PDOException $e) {
+            echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
+        }
+        exit;
     }
 
     function autoSaveNOTES() {
