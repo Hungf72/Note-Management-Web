@@ -11,49 +11,83 @@
 
     <style>
         body {
-        min-height: 100vh;
-        display: flex;
+            min-height: 100vh;
+            display: flex;
         }
 
         .sidebar {
-        min-width: 220px;
-        max-width: 220px;
-        background-color: #343a40;
-        color: #fff;
-        padding-top: 20px;
+            min-width: 220px;
+            max-width: 220px;
+            background-color: #343a40;
+            color: #fff;
+            padding-top: 20px;
         }
 
         .sidebar a {
-        color: #fff;
-        display: block;
-        padding: 10px 20px;
-        text-decoration: none;
+            color: #fff;
+            display: block;
+            padding: 10px 20px;
+            text-decoration: none;
         }
 
         .sidebar a:hover {
-        background-color: #495057;
+            background-color: #495057;
         }
 
         .main-content {
-        flex-grow: 1;
-        padding: 20px;
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .sidebar img {
+            transition: transform 0.3s ease !important;
+            cursor: pointer !important;
+            width: 35px;
+            height: 35px;
+        }
+
+        .sidebar img:hover{
+            transform: scale(1.5) !important;
+        }
+
+        .popup-container {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+
+        #userForm img{
+            transition: transform 0.3s ease !important;
+            cursor: pointer !important;
+            width: 80x;
+            height: 80px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar -->
+    <!-- sidebar -->
     <div class="sidebar">
-        <h4 class="text-center mb-4">Note App</h4>
+        <div class="d-flex justify-content-center align-items-center mb-4">
+            <img id="userInfo" src="/Note-Management-Web/Note-Web/images/personal.png" alt="User Icon" class="rounded-circle mr-2">
+            <h5 class="mb-0"><span id="userName">Guest</span></h5>
+        </div>
+
         <a href="#"><i class="fas fa-home"></i> Dashboard</a>
         <a href="#"><i class="fas fa-sticky-note"></i> Notes</a>
         <a href="#"><i class="fas fa-cog"></i> Settings</a>
-        <a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <a href="login.html" id="logOut"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
-    <!-- Main Content -->
+    <!-- main content -->
     <div class="container mt-5">
+        <!-- message activation -->
         <div class="alert alert-info mt-3" id="activationMsg" style="display: none;"></div>
+
         <h1>Welcome to your Note App!</h1>
         <p>This is the home page where you can manage your notes.</p>
 
@@ -78,166 +112,320 @@
         <div id="notesList"></div>
     </div>
 
+    <!-- pop up contain user information-->
+    <div id="popup-card" class="popup-container" style="display:none;">
+        <div class="popup-body bg-white p-4 rounded shadow" style="width: 380px">
+            <form id="userForm">
+                <div class="form-group">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <img id="userInfo" src="/Note-Management-Web/Note-Web/images/personal.png" alt="User Icon" class="rounded-circle mr-2">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="lastNameUser">Last Name</label>
+                        <input name="lastname" type="text" class="form-control" id="lastNameUser" placeholder="Huynh" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="firstNameUser">First Name</label>
+                        <input name="firstname" type="text" class="form-control" id="firstNameUser" placeholder="Kyle" required> 
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailUser">Email</label>
+                    <input name="email" type="email" class="form-control" id="emailUser" placeholder="example@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="ageUser">Age</label>
+                    <input name="age" type="number" class="form-control" id="ageUser" placeholder="Age" min="1" max="100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phoneUser">Phone number</label>
+                    <input name="phone" type="tel" class="form-control" id="phoneUser" placeholder="0901234567" pattern="[0-9]{10,11}" required>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button style="width: 130px;" type="button" id="editBtn" class="btn btn-primary">Edit</button>
+                    <button style="width: 130px;" type="submit" id="saveBtn" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- message dialog -->
+    <div class="modal fade" id="message-dialog">
+        <div class="modal-dialog">
+           <div class="modal-content">
+                <div class="modal-header justify-content-center">
+                    <h4 class="modal-title text-center">Thông báo</h4>
+                </div>
+  
+                <div class="modal-body">
+                    <!-- hien thong bao o day -->
+                    <p id="modalMessage"></p>
+                </div>
+           
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Đóng</button>
+                </div>            
+           </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
-        fetchNotes();
-        
-        document.getElementById('noteForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            createNote();
-        });
-
-        const email = localStorage.getItem('email');
-
-        if (!email) {
-            console.log('Chưa có email để kiểm tra kích hoạt.');
-            return;
-        }
-
-        alert(email)
-
-        fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(email)}`, {
-            method: 'GET'
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                if (!data.is_active) {
-                    const link = localStorage.getItem('activation_link'); // <-- thêm dòng này
-                    const msgBox = document.getElementById('activationMsg');
-                    msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
-                    msgBox.style.display = 'block';
-                }
-            } 
-            else{
-                console.error('Lỗi server:', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Lỗi kết nối:', error);
-        });
-
-        function fetchNotes() {
-            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
-                method: 'GET' 
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    displayNotes(data.notes);
-                } else {
-                    console.error('Lỗi khi lấy notes:', data.message);
-                    console.log('Dữ liệu trả về:', data);
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi kết nối:', error);
-            });
-        }
-
-        function createNote() {
-            const title = document.getElementById('noteTitle').value;
-            const content = document.getElementById('noteContent').value;
-
-            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    title,
-                    content,
-                    action: 'create' 
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    document.getElementById('noteTitle').value = '';
-                    document.getElementById('noteContent').value = '';
-                    fetchNotes();
-                } else {
-                    alert('Error creating note: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi kết nối:', error);
-            });
-        }
-
-        function displayNotes(notes) {
-            const notesList = document.getElementById('notesList');
-            notesList.innerHTML = '';
-
-            if (notes.length === 0) {
-                notesList.innerHTML = '<p class="text-center">No notes found.</p>';
-                return;
-            }
-
-            notes.forEach(note => {
-                const noteCard = document.createElement('div');
-                noteCard.className = 'card note-card';
-                noteCard.innerHTML = `
-                    <div class="card-body" style="max-width: 50%;">
-                        <h5 class="card-title">${note.title}</h5>
-                        <p class="card-text">${note.content}</p>
-                        <div class="d-flex align-items-center">
-                            <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
-                            <button class="btn btn-sm btn-primary edit-btn pl-3 pr-3 ml-3" data-id="${note.id}">Edit</button>
-                            <button class="btn btn-sm btn-danger delete-btn pl-3 pr-3 ml-3" data-id="${note.id}">Delete</button>
-                        </div>
-                    </div>
-                `;
-                notesList.appendChild(noteCard);
-
-            });
-        }
-
-        document.getElementById('notesList').addEventListener('click', function(e) {
-            if (e.target && e.target.classList.contains('delete-btn')) {
-                const noteId = e.target.getAttribute('data-id');
-                deleteNote(noteId);
-            }
-        });
-
-        document.getElementById('notesList').addEventListener('click', function(e) {
-            if (e.target && e.target.classList.contains('edit-btn')) {
-                const noteId = e.target.getAttribute('data-id');
-                editNote(noteId);
-            }
-        });
-
-        function deleteNote(noteId) {
-            if (!confirm('Are you sure you want to delete this note?')) return;
-
-            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    id: noteId,
-                    action: 'delete'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    fetchNotes();
-                } else {
-                    alert('Error deleting note: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi kết nối:', error);
-            });
-        }
-
-        function editNote(noteId) {
+            fetchNotes();
             
-        }
-    });
+            document.getElementById('noteForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                createNote();
+            });
+
+            const email = localStorage.getItem('email');
+            alert(email)
+
+            if (!email) {
+                setTimeout(() =>{
+                    window.location.href = "login.html";
+                }, 1000)
+            }
+
+            // kich hoat tai khoan
+            fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(email)}`, {
+                method: 'GET'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (!data.is_active) {
+                        const link = localStorage.getItem('activation_link'); 
+                        const msgBox = document.getElementById('activationMsg');
+                        msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
+                        msgBox.style.display = 'block';
+                    }
+                } 
+                else{
+                    console.error('Lỗi server:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi kết nối:', error);
+            });
+
+            // lay thong tin nguoi dung
+            fetch('/Note-Management-Web/Note-Web/controllers/getUser.php')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const userName = document.getElementById('userName');
+                    userName.textContent = data.firstName + ' ' + data.lastName;
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi lấy user:', error);
+            });
+
+            function fetchNotes() {
+                fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                    method: 'GET' 
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayNotes(data.notes);
+                    } else {
+                        console.error('Lỗi khi lấy notes:', data.message);
+                        console.log('Dữ liệu trả về:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi kết nối:', error);
+                });
+            }
+
+            function createNote() {
+                const title = document.getElementById('noteTitle').value;
+                const content = document.getElementById('noteContent').value;
+
+                fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        title,
+                        content,
+                        action: 'create' 
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('noteTitle').value = '';
+                        document.getElementById('noteContent').value = '';
+                        fetchNotes();
+                    } else {
+                        alert('Error creating note: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi kết nối:', error);
+                });
+            }
+
+            function displayNotes(notes) {
+                const notesList = document.getElementById('notesList');
+                notesList.innerHTML = '';
+
+                if (notes.length === 0) {
+                    notesList.innerHTML = '<p class="text-center">No notes found.</p>';
+                    return;
+                }
+
+                notes.forEach(note => {
+                    const noteCard = document.createElement('div');
+                    noteCard.className = 'card note-card';
+                    noteCard.innerHTML = `
+                        <div class="card-body" style="max-width: 50%;">
+                            <h5 class="card-title">${note.title}</h5>
+                            <p class="card-text">${note.content}</p>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
+                                <button class="btn btn-sm btn-primary edit-btn pl-3 pr-3 ml-3" data-id="${note.id}">Edit</button>
+                                <button class="btn btn-sm btn-danger delete-btn pl-3 pr-3 ml-3" data-id="${note.id}">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    notesList.appendChild(noteCard);
+
+                });
+            }
+
+            document.getElementById('notesList').addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('delete-btn')) {
+                    const noteId = e.target.getAttribute('data-id');
+                    deleteNote(noteId);
+                }
+            });
+
+            document.getElementById('notesList').addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('edit-btn')) {
+                    const noteId = e.target.getAttribute('data-id');
+                    editNote(noteId);
+                }
+            });
+
+            function deleteNote(noteId) {
+                if (!confirm('Are you sure you want to delete this note?')) return;
+
+                fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        id: noteId,
+                        action: 'delete'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        fetchNotes();
+                    } else {
+                        alert('Error deleting note: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi kết nối:', error);
+                });
+            }
+
+            function editNote(noteId) {
+                
+            }
+        });
+
+        // khi an logout remove localStorage
+        document.getElementById("logOut").addEventListener("click", function(e) {
+            e.preventDefault();
+
+            localStorage.removeItem("email");
+            localStorage.removeItem("is_activated");
+
+            const userName = document.getElementById("userName")
+
+            if (userName) {
+                userName.textContent = "Guest";
+            }
+
+            window.location.href = "login.html"; 
+        });
+
+        //close pop up
+        document.getElementById('popup-card').addEventListener('click', (e) => {
+            if (e.target.id === 'popup-card') {
+                e.target.style.display = 'none';
+
+                document.getElementById('firstNameUser').readOnly = true;
+                document.getElementById('lastNameUser').readOnly = true;
+                document.getElementById('ageUser').readOnly = true;
+                document.getElementById('phoneUser').readOnly = true;
+            }
+        });
+
+        // show information
+        document.getElementById("userInfo").addEventListener("click", () => {
+            document.getElementById('popup-card').style.display = 'flex';
+            fetch('/Note-Management-Web/Note-Web/controllers/getUser.php')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('emailUser').value = data.email;
+                    document.getElementById('firstNameUser').value = data.firstName;
+                    document.getElementById('lastNameUser').value = data.lastName;
+                    document.getElementById('ageUser').value = data.age;
+                    document.getElementById('phoneUser').value = data.phone;
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi lấy user:', error);
+            });
+        });
+
+        document.getElementById('editBtn').addEventListener('click', () =>{
+            ['firstNameUser', 'lastNameUser', 'emailUser', 'ageUser', 'phoneUser'].forEach(id => {
+                document.getElementById(id).readOnly = false;
+            });
+        });
+
+        // update information
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('/Note-Management-Web/Note-Web/controllers/updateUser.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("modalMessage").textContent = data.message;
+                $('#message-dialog').modal('show');
+
+                if (data.status === "success") {
+                    location.reload();
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi khi cập nhật:', err);
+            });
+        });
+
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
@@ -245,9 +433,3 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
 </body>
 </html>
-
-<!-- if (link && isActivated !== 'true') {
-                const msgBox = document.getElementById('activationMsg');
-                msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
-                msgBox.style.display = 'block';
-            } -->
