@@ -74,12 +74,9 @@
         }
     }
 
-    function updateNOTES(){
+    function editNOTES($noteId){
         global $pdo;
         if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-            $noteId = $_POST['id'] ?? null;
-            $title = trim($_POST['title'] ?? '');
-            $content = trim($_POST['content'] ?? '');
             $userId = $_SESSION['user']['id'] ?? null;
 
             if (!$userId) {
@@ -93,8 +90,8 @@
             }
 
             try {
-                $stmt = $pdo->prepare("UPDATE notes SET title = :title, content = :content WHERE id = :id AND user_id = :user_id");
-                $stmt->execute(['title' => $title, 'content' => $content, 'id' => $noteId, 'user_id' => $userId]);
+                $stmt = $pdo->prepare("SELECT * FROM notes WHERE id = :id AND user_id = :user_id");
+                $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
                 echo json_encode(['status' => 'success', 'message' => 'Note đã được cập nhật thành công.']);
             } catch (PDOException $e) {
                 echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
@@ -130,7 +127,14 @@
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        getNOTES();
+        $id = $_GET['id'] ?? null;
+        $action = $_GET['action'] ?? '';
+
+        if ($id && $action === 'edit') {
+            editNOTES($id);
+        } else {
+            getNOTES();
+        }
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
         switch ($action) {
@@ -139,9 +143,6 @@
                 break;
             case 'delete':
                 deleteNOTES();
-                break;
-            case 'update':
-                updateNOTES();
                 break;
             case 'autosave':
                 autoSaveNOTES();
@@ -154,5 +155,4 @@
         echo json_encode(['status' => 'error', 'message' => 'Unsupported request method']);
         exit;
     }
-    ?>
 ?>
