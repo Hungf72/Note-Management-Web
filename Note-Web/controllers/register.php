@@ -16,14 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->execute([$email]);
     if ($stmt->rowCount() > 0) {
-        echo json_encode(['status' => 'error', 'message' => 'Email đã tồn tại']);
+        echo json_encode(['status' => 'error', 'message' => 'Email has been existed.']);
         exit;
     }
 
     if ($password !== $confirm_password) {
         echo json_encode([
             'status' => 'error',
-            'message' => 'Mật khẩu và xác nhận mật khẩu không khớp!'
+            'message' => 'Password and Confirm Password does not match!'
         ]);
         exit;
     }
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         echo json_encode([
             'status' => 'success',
-            'message' => 'Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.',
+            'message' => 'Registed Successfull! Please check email for activating account.',
             'activation_link' => $activation_link,
             'email' => $email,
         ]);
