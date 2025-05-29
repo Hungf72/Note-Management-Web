@@ -206,7 +206,9 @@
                 const noteId = e.target.getAttribute('data-id');
                 editNote(noteId);
             }
-        });        function deleteNote(noteId) {
+        });        
+        
+        function deleteNote(noteId) {
             if (!confirm('Bạn muốn xóa note này?')) return;
 
             fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
