@@ -28,7 +28,7 @@ create table labels (
     note_id int not null,
     user_id int not null,
     name varchar(255) not null,
-    PRIMARY KEY (note_id, label_id),
+
     FOREIGN KEY (note_id) REFERENCES notes(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
