@@ -54,13 +54,39 @@
     <!-- Main Content -->
     <div class="container mt-5">
         <div class="alert alert-info mt-3" id="activationMsg" style="display: none;"></div>
-
         <h1>Welcome to your Note App!</h1>
         <p>This is the home page where you can manage your notes.</p>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Create New Note</h5>
+            </div>
+            <div class="card-body">
+                <form id="noteForm">
+                    <div class="form-group">
+                        <label for="noteTitle">Title</label>
+                        <input type="text" class="form-control" id="noteTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="noteContent">Content</label>
+                        <textarea class="form-control" id="noteContent" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Note</button>
+                </form>
+            </div>
+        </div>
+        <div id="notesList"></div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+        fetchNotes();
+        
+        document.getElementById('noteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            createNote();
+        });
 
         const email = localStorage.getItem('email');
 
@@ -91,6 +117,114 @@
         .catch(error => {
             console.error('Lỗi kết nối:', error);
         });
+
+        function fetchNotes() {
+            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                method: 'GET' 
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    displayNotes(data.notes);
+                } else {
+                    console.error('Lỗi khi lấy notes:', data.message);
+                    console.log('Dữ liệu trả về:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi kết nối:', error);
+            });
+        }
+
+        function createNote() {
+            const title = document.getElementById('noteTitle').value;
+            const content = document.getElementById('noteContent').value;
+
+            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    title,
+                    content,
+                    action: 'create' 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('noteTitle').value = '';
+                    document.getElementById('noteContent').value = '';
+                    fetchNotes();
+                } else {
+                    alert('Error creating note: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi kết nối:', error);
+            });
+        }
+
+        function displayNotes(notes) {
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+
+            if (notes.length === 0) {
+                notesList.innerHTML = '<p class="text-center">No notes found.</p>';
+                return;
+            }
+
+            notes.forEach(note => {
+                const noteCard = document.createElement('div');
+                noteCard.className = 'card note-card';
+                noteCard.innerHTML = `
+                    <div class="card-body" style="max-width: 50%;">
+                        <h5 class="card-title">${note.title}</h5>
+                        <p class="card-text">${note.content}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="${note.id}">Delete</button>
+                        </div>
+                    </div>
+                `;
+                notesList.appendChild(noteCard);
+
+            });
+        }
+
+        document.getElementById('notesList').addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('delete-btn')) {
+                const noteId = e.target.getAttribute('data-id');
+                deleteNote(noteId);
+            }
+        });
+
+        function deleteNote(noteId) {
+            if (!confirm('Are you sure you want to delete this note?')) return;
+
+            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    id: noteId,
+                    action: 'delete'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    fetchNotes();
+                } else {
+                    alert('Error deleting note: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi kết nối:', error);
+            });
+        }
     });
     </script>
 
