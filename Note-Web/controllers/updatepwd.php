@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = trim($_POST['password'] ?? '');
 
     if (empty($password)) {
-        echo json_encode(['status' => 'error', 'message' => 'Mật khẩu không được để trống.']);
+        echo json_encode(['status' => 'error', 'message' => 'Password could not be empty.']);
         exit;
     }
 
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'email' => $email
     ]);
 
-    echo json_encode(['status' => 'success', 'message' => 'Mật khẩu đã được cập nhật thành công.']);
+    echo json_encode(['status' => 'success', 'message' => 'Password has been updated.']);
     exit;
 }
 
