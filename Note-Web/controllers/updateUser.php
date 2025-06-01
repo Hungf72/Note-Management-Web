@@ -27,6 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         if ($success) {
+            // Update session user info after successful update
+            $_SESSION['user']['firstName'] = $firstName;
+            $_SESSION['user']['lastName'] = $lastName;
+            $_SESSION['user']['age'] = $age;
+            $_SESSION['user']['phone'] = $phone;
             echo json_encode(["status" => "success", "message" => "Cập nhật thành công"]);
         } else {
             echo json_encode(["status" => "error", "message" => "Cập nhật thất bại"]);
