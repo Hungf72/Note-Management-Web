@@ -25,10 +25,10 @@ create table notes (
 
 create table labels (
     label_id int primary key AUTO_INCREMENT,
+    name varchar(255) not null,
     note_id int not null,
     user_id int not null,
-    name varchar(255) not null,
-
+    created_at timestamp default CURRENT_TIMESTAMP,
     FOREIGN KEY (note_id) REFERENCES notes(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
