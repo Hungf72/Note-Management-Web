@@ -125,27 +125,27 @@
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="lastNameUser">Last Name</label>
-                        <input name="lastname" type="text" class="form-control" id="lastNameUser" placeholder="Huynh" required>
+                        <input name="lastname" type="text" class="form-control" id="lastNameUser" placeholder="Huynh" required readonly>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="firstNameUser">First Name</label>
-                        <input name="firstname" type="text" class="form-control" id="firstNameUser" placeholder="Kyle" required> 
+                        <input name="firstname" type="text" class="form-control" id="firstNameUser" placeholder="Kyle" required readonly> 
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="emailUser">Email</label>
-                    <input name="email" type="email" class="form-control" id="emailUser" placeholder="example@email.com" required>
+                    <input name="email" type="email" class="form-control" id="emailUser" placeholder="example@email.com" required readonly>
                 </div>
 
                 <div class="form-group">
                     <label for="ageUser">Age</label>
-                    <input name="age" type="number" class="form-control" id="ageUser" placeholder="Age" min="1" max="100" required>
+                    <input name="age" type="number" class="form-control" id="ageUser" placeholder="Age" min="1" max="100" required readonly>
                 </div>
 
                 <div class="form-group">
                     <label for="phoneUser">Phone number</label>
-                    <input name="phone" type="tel" class="form-control" id="phoneUser" placeholder="0901234567" pattern="[0-9]{10,11}" required>
+                    <input name="phone" type="tel" class="form-control" id="phoneUser" placeholder="0901234567" pattern="[0-9]{10,11}" required readonly>
                 </div>
 
                 <div class="d-flex justify-content-between">
@@ -188,8 +188,9 @@
             const email = localStorage.getItem('email');
 
             if (!email) {
-                console.log('Chưa có email để kiểm tra kích hoạt.');
-                return;
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
             }
 
             alert(email)
@@ -415,7 +416,7 @@
         });
 
         document.getElementById('editBtn').addEventListener('click', () =>{
-            ['firstNameUser', 'lastNameUser', 'emailUser', 'ageUser', 'phoneUser'].forEach(id => {
+            ['firstNameUser', 'lastNameUser', 'ageUser', 'phoneUser'].forEach(id => {
                 document.getElementById(id).readOnly = false;
             });
         });
@@ -435,7 +436,26 @@
                 $('#message-dialog').modal('show');
 
                 if (data.status === "success") {
-                    location.reload();
+                    // Cập nhật lại input và tên user mà không reload trang
+                    fetch('/Note-Management-Web/Note-Web/controllers/getUser.php')
+                    .then(res => res.json())
+                    .then(user => {
+                        if (user.status === 'success') {
+                            document.getElementById('emailUser').value = user.email;
+                            document.getElementById('firstNameUser').value = user.firstName;
+                            document.getElementById('lastNameUser').value = user.lastName;
+                            document.getElementById('ageUser').value = user.age;
+                            document.getElementById('phoneUser').value = user.phone;
+                            const userName = document.getElementById('userName');
+                            userName.textContent = user.firstName + ' ' + user.lastName;
+                        }
+
+                        ['firstNameUser', 'lastNameUser', 'ageUser', 'phoneUser'].forEach(id => {
+                            document.getElementById(id).readOnly = true;
+                        });
+
+                        document.getElementById('popup-card').style.display = 'none';
+                    });
                 }
             })
             .catch(err => {
@@ -450,12 +470,3 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
 </body>
 </html>
-<<<<<<< HEAD
-=======
-
-<!-- if (link && isActivated !== 'true') {
-                const msgBox = document.getElementById('activationMsg');
-                msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
-                msgBox.style.display = 'block';
-            } -->
->>>>>>> e6718a50f43a79c791b95b757cafd03203f92155
