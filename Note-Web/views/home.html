@@ -74,6 +74,73 @@
         <div id="notesList"></div>
     </div>
 
+<<<<<<< HEAD
+=======
+    <!-- pop up contain user information-->
+    <div id="popup-card" class="popup-container" style="display:none;">
+        <div class="popup-body bg-white p-4 rounded shadow" style="width: 380px">
+            <form id="userForm">
+                <div class="form-group">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <img id="userInfo" src="/Note-Management-Web/Note-Web/images/personal.png" alt="User Icon" class="rounded-circle mr-2">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="lastNameUser">Last Name</label>
+                        <input name="lastname" type="text" class="form-control" id="lastNameUser" placeholder="Huynh" required readonly>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="firstNameUser">First Name</label>
+                        <input name="firstname" type="text" class="form-control" id="firstNameUser" placeholder="Kyle" required readonly> 
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailUser">Email</label>
+                    <input name="email" type="email" class="form-control" id="emailUser" placeholder="example@email.com" required readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="ageUser">Age</label>
+                    <input name="age" type="number" class="form-control" id="ageUser" placeholder="Age" min="1" max="100" required readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="phoneUser">Phone number</label>
+                    <input name="phone" type="tel" class="form-control" id="phoneUser" placeholder="0901234567" pattern="[0-9]{10,11}" required readonly>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button style="width: 130px;" type="button" id="editBtn" class="btn btn-primary">Edit</button>
+                    <button style="width: 130px;" type="submit" id="saveBtn" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- message dialog -->
+    <div class="modal fade" id="message-dialog">
+        <div class="modal-dialog">
+           <div class="modal-content">
+                <div class="modal-header justify-content-center">
+                    <h4 class="modal-title text-center">Thông báo</h4>
+                </div>
+  
+                <div class="modal-body">
+                    <!-- hien thong bao o day -->
+                    <p id="modalMessage"></p>
+                </div>
+           
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Đóng</button>
+                </div>            
+           </div>
+        </div>
+    </div>
+
+>>>>>>> c57248d9b69c8d46fc27195a4dcb06c27c0dd464
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -84,6 +151,7 @@
             createNote();
         });
 
+<<<<<<< HEAD
         const email = localStorage.getItem('email');
 
         if (!email) {
@@ -108,6 +176,12 @@
             } 
             else{
                 console.error('Lỗi server:', data.message);
+=======
+            if (!email) {
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+>>>>>>> c57248d9b69c8d46fc27195a4dcb06c27c0dd464
             }
         })
         .catch(error => {
@@ -368,8 +442,61 @@
                 console.error('Connection error:', error);
                 return [];
             });
+<<<<<<< HEAD
         }
     });
+=======
+        });
+
+        document.getElementById('editBtn').addEventListener('click', () =>{
+            ['firstNameUser', 'lastNameUser', 'ageUser', 'phoneUser'].forEach(id => {
+                document.getElementById(id).readOnly = false;
+            });
+        });
+
+        // update information
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('/Note-Management-Web/Note-Web/controllers/updateUser.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("modalMessage").textContent = data.message;
+                $('#message-dialog').modal('show');
+
+                if (data.status === "success") {
+                    // Cập nhật lại input và tên user mà không reload trang
+                    fetch('/Note-Management-Web/Note-Web/controllers/getUser.php')
+                    .then(res => res.json())
+                    .then(user => {
+                        if (user.status === 'success') {
+                            document.getElementById('emailUser').value = user.email;
+                            document.getElementById('firstNameUser').value = user.firstName;
+                            document.getElementById('lastNameUser').value = user.lastName;
+                            document.getElementById('ageUser').value = user.age;
+                            document.getElementById('phoneUser').value = user.phone;
+                            const userName = document.getElementById('userName');
+                            userName.textContent = user.firstName + ' ' + user.lastName;
+                        }
+
+                        ['firstNameUser', 'lastNameUser', 'ageUser', 'phoneUser'].forEach(id => {
+                            document.getElementById(id).readOnly = true;
+                        });
+
+                        document.getElementById('popup-card').style.display = 'none';
+                    });
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi khi cập nhật:', err);
+            });
+        });
+
+>>>>>>> c57248d9b69c8d46fc27195a4dcb06c27c0dd464
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
@@ -377,9 +504,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
 </body>
 </html>
+<<<<<<< HEAD
 
 <!-- if (link && isActivated !== 'true') {
                 const msgBox = document.getElementById('activationMsg');
                 msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
                 msgBox.style.display = 'block';
             } -->
+=======
+>>>>>>> c57248d9b69c8d46fc27195a4dcb06c27c0dd464
