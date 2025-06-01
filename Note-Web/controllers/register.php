@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 require_once __DIR__ . '/../models/connect.php';
 header('Content-Type: application/json');
 
@@ -44,6 +46,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':email'     => $email,
             ':password'  => $hashed_password,
         ]);
+        
+        $_SESSION['user'] = [
+            'email' => $email,
+            'firstName' => $firstName,
+            'lastName' => $lastName,
+            'age' => $age,
+            'phone' => $phone
+        ];
 
         // Gửi email kích hoạt
         $activation_link = "activate.html?email=" . urlencode($email);
