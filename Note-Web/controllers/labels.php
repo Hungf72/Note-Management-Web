@@ -26,10 +26,10 @@
     }
 
     function createLABELS() {
-        global $pdo;
+        global $pdo;        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = trim($_POST['name'] ?? '');
             $noteId = $_POST['note_id'] ?? null;
+            $name = trim($_POST['name'] ?? '');
             $userId = $_SESSION['user']['id'] ?? null;
 
             if (!$userId) {
@@ -70,7 +70,7 @@
             }
 
             try {
-                $stmt = $pdo->prepare("DELETE FROM labels WHERE id = :id AND user_id = :user_id");
+                $stmt = $pdo->prepare("DELETE FROM labels WHERE label_id = :id AND user_id = :user_id");
                 $stmt->execute(['id' => $labelId, 'user_id' => $userId]);
                 echo json_encode(['status' => 'success', 'message' => 'Nhãn đã được xóa thành công.']);
             } catch (PDOException $e) {
@@ -98,7 +98,7 @@
             }
 
             try {
-                $stmt = $pdo->prepare("UPDATE labels SET name = :name WHERE id = :id AND user_id = :user_id");
+                $stmt = $pdo->prepare("UPDATE labels SET name = :name WHERE label_id = :id AND user_id = :user_id");
                 $stmt->execute(['name' => $name, 'id' => $labelId, 'user_id' => $userId]);
                 echo json_encode(['status' => 'success', 'message' => 'Nhãn đã được cập nhật thành công.']);
             } catch (PDOException $e) {
@@ -106,5 +106,29 @@
             }
             exit;
         }
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $action = $_POST['action'] ?? '';
+        switch ($action) {
+            case 'get':
+                getLABELS();
+                break;
+            case 'create':
+                createLABELS();
+                break;
+            case 'delete':
+                deleteLABELS();
+                break;
+            case 'edit':
+                editLABELS();
+                break;
+            default:
+                echo json_encode(['status' => 'error', 'message' => 'Hành động không hợp lệ.']);
+                exit;
+        }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Yêu cầu không hợp lệ.']);
+        exit;
     }
 ?>
