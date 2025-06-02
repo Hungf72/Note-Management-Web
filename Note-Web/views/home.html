@@ -199,11 +199,27 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             fetchNotes();
-            let editingNoteId = null;
 
-            function createNote() {
-                const title = document.getElementById('noteTitle').value.trim();
-                const content = document.getElementById('noteContent').value.trim();
+            document.getElementById("noteForm").addEventListener("submit", function (e) {
+                e.preventDefault();
+                const noteId = this.getAttribute("data-id");
+                const title = document.getElementById("noteTitle").value.trim();
+                const content =
+                    document.getElementById("noteContent").value.trim();
+
+                if (!title || !content) {
+                    alert("Both title and content are required.");
+                    return;
+                }
+
+                if (noteId) {
+                    updateNote(noteId, title, content);
+                } else {
+                    createNote(title, content);
+                }
+            });
+
+            function createNote(title, content) {
                 if (!title) {
                     alert('Title is required.');
                     return;
@@ -222,7 +238,8 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        resetNoteForm();
+                        document.getElementById('noteTitle').value = '';
+                        document.getElementById('noteContent').value = '';
                         fetchNotes();
                     } else {
                         alert('Error creating note: ' + data.message);
@@ -264,9 +281,9 @@
                 const noteCard = document.createElement('div');
                 noteCard.className = 'card note-card';
                 noteCard.innerHTML = `
-                    <div class="card-body" style="max-width: 50%;">
+                    <div class="card-body">
                         <h5 class="card-title">${note.title}</h5>
-                        <p class="card-text">${note.content}</p>
+                        <p class="card-text">${note.content || ''}</p>
                         <div class="d-flex align-items-center">
                             <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
                             <button class="btn btn-sm btn-primary edit-btn pl-3 pr-3 ml-3" data-id="${note.id}">Edit</button>
@@ -296,17 +313,6 @@
         function deleteNote(noteId) {
             if (!confirm('Bạn muốn xóa note này?')) return;
 
-            fetch(`/Note-Management-Web/Note-Web/controllers/taks.php`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    note_id: noteId,
-                    label_id: '',
-                    action: 'delete'
-                })
-            })
             fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
                 method: 'POST',
                 headers: {
@@ -345,7 +351,7 @@
                     document.getElementById('noteContent').value = data.note.content;
                     document.getElementById('noteFormBtn').textContent = 'Update Note';
                     document.getElementById('noteFormHeader').textContent = 'Edit Note';
-                    editingNoteId = noteId;
+                    document.getElementById("noteForm").setAttribute("data-id", noteId);
                 } else {
                     alert('Error fetching note: ' + data.message);
                 }
@@ -377,7 +383,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    resetNoteForm();
+                    document.getElementById('noteTitle').value = '';
+                    document.getElementById('noteContent').value = '';
+                    document.getElementById('noteFormBtn').textContent = 'Create Note';
                     fetchNotes();
                 } else {
                     alert('Error updating note: ' + data.message);
