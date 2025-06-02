@@ -71,7 +71,7 @@
   <!-- form -->
   <div class="glass z-10 w-[90%] max-w-xl p-8 sm:p-10 text-white shadow-xl">
     <h2 class="text-3xl font-bold mb-6 text-center">Create Account</h2>
-    <form id="registerForm" class="space-y-5">
+    <form id="registerForm" class="space-y-5" autocomplete="off">
 
       <div class="flex flex-col sm:flex-row gap-4">
         <input type="text" placeholder="Last Name" class="input-style" required />
@@ -112,11 +112,11 @@
   </div>
 
     <!-- message dialog -->
-    <div class="fixed inset-0 z-20 bg-black/50 hidden items-center justify-center" id="modal">
+  <div class="fixed inset-0 z-20 bg-black/50 hidden items-center justify-center" id="modal">
     <div class="bg-white text-black rounded-lg p-6 w-[90%] max-w-md text-center">
       <h4 class="text-lg font-semibold mb-4">Notifications</h4>
       <p id="modalMessage" class="mb-4"></p>
-      <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="document.getElementById('modal').classList.add('hidden')">Close</button>
+      <button class="bg-blue-500 text-white px-4 py-2 rounded" id="closeModalBtn">Close</button>
     </div>
   </div>
   
@@ -141,10 +141,47 @@
       toggle("confirmPassword", "eyeOpen2", "eyeSlash2");
     });
 
+    // Sửa lại show/hide modal cho đúng id
+    function showModal(message) {
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('modal').classList.remove('hidden');
+    }
+    document.getElementById('closeModalBtn').onclick = function() {
+      document.getElementById('modal').classList.add('hidden');
+    };
+
     document.getElementById("registerForm").addEventListener("submit", function(e) {
         e.preventDefault();
 
-        const formData = new FormData(this);
+        const form = this;
+        const inputs = form.querySelectorAll('input');
+        // Lấy đúng thứ tự input
+        const lastName = inputs[0].value.trim();
+        const firstName = inputs[1].value.trim();
+        const age = inputs[2].value.trim();
+        const phone = inputs[3].value.trim();
+        const email = inputs[4].value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        // Validate đơn giản
+        if (!lastName || !firstName || !age || !phone || !email || !password || !confirmPassword) {
+          showModal('Vui lòng nhập đầy đủ thông tin!');
+          return;
+        }
+        if (password !== confirmPassword) {
+          showModal('Mật khẩu xác nhận không khớp!');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('lastname', lastName);
+        formData.append('firstname', firstName);
+        formData.append('age', age);
+        formData.append('phone', phone);
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('confirm_password', confirmPassword);
 
         fetch("/Note-Management-Web/Note-Web/controllers/register.php", {
             method: "POST",
@@ -152,9 +189,7 @@
         })
         .then(response => response.json())
         .then(data => {
-            document.getElementById("modalMessage").textContent = data.message;
-            $('#message-dialog').modal('show');
-
+            showModal(data.message);
             if (data.status === "success") {
                 localStorage.setItem('activation_link', data.activation_link);
                 localStorage.setItem('email',data.email);
@@ -165,8 +200,7 @@
         })
         .catch(error => {
             console.error(error);
-            document.getElementById("modalMessage").textContent = "Đã xảy ra lỗi!";
-            $('#message-dialog').modal('show');
+            showModal("Đã xảy ra lỗi!");
         });
     });
 
