@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         // Gửi email kích hoạt
-        $activation_link = "activate.html?email=" . urlencode($email);
+        $activation_link = "http://localhost/Note-Management-Web/Note-Web/views/activate.html?email=" . urlencode($email);
 
         echo json_encode([
             'status' => 'success',
