@@ -50,14 +50,14 @@
             transform: scale(1.5) !important;
         }
 
-        .label-container {
+        .task-container {
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
             margin-top: 10px;
         }
         
-        .note-label {
+        .note-task {
             background-color: #007bff;
             color: white;
             padding: 3px 8px;
@@ -289,21 +289,21 @@
             }
 
             notes.forEach(note => {
-                fetchLabels(note.id).then(labels => {
+                fetchTasks(note.id).then(tasks => {
                     const noteCard = document.createElement('div');
                     noteCard.className = 'card note-card mb-3';
                     
-                    const labelElements = Array.isArray(labels) ? labels.map(label => `<span class="note-label">${label.name}</span>`).join('') : '';
+                    const taskElements = Array.isArray(tasks) ? tasks.map(task => `<span class="note-task">${task.name}</span>`).join('') : '';
 
                     noteCard.innerHTML = `
                         <div class="card-body">
                             <h5 class="card-title">${note.title}</h5>
-                            <div class="label-container">
-                                ${labelElements}
+                            <div class="task-container">
+                                ${taskElements}
                             </div>
                             <div class="d-flex align-items-center mt-2">
                                 <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
-                                <button class="btn btn-sm btn-secondary add-label-btn ml-3" data-id="${note.id}">Add label</button>
+                                <button class="btn btn-sm btn-secondary add-task-btn ml-3" data-id="${note.id}">Add task</button>
                                 <button class="btn btn-sm btn-primary edit-btn ml-3" data-id="${note.id}">Edit</button>
                                 <button class="btn btn-sm btn-danger delete-btn ml-3" data-id="${note.id}">Delete</button>
                             </div>
@@ -311,7 +311,7 @@
                     `;
                     notesList.appendChild(noteCard);
                 }).catch(error => {
-                    console.error('Error fetching labels for note:', note.id, error);
+                    console.error('Error fetching tasks for note:', note.id, error);
                 });
             });
         }
@@ -330,16 +330,17 @@
             }
         });   
         
-        document.getElementById('note-label').addEventListener('click', function(e) {
-            console.log('Add label button clicked');
+        document.getElementById('notesList').addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('add-task-btn')) {
+                const noteId = e.target.getAttribute('data-id');
+                addTask(noteId);
+            }
         });
 
-        document.getElementById
-        
         function deleteNote(noteId) {
             if (!confirm('Bạn muốn xóa note này?')) return;
 
-            fetch(`/Note-Management-Web/Note-Web/controllers/labels.php`, {
+            fetch(`/Note-Management-Web/Note-Web/controllers/taks.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -442,37 +443,37 @@
             });
         }
 
-        function addLabel(noteId) {
-            const oldInput = document.getElementById('labelContent');
+        function addTask(noteId) {
+            const oldInput = document.getElementById('taskContent');
             if (oldInput) oldInput.remove();
 
-            const noteCard = document.querySelector(`.note-card .add-label-btn[data-id="${noteId}"]`).closest('.note-card');
+            const noteCard = document.querySelector(`.note-card .add-task-btn[data-id="${noteId}"]`).closest('.note-card');
 
             const inputDiv = document.createElement('div');
             inputDiv.className = 'input-group mt-2';
-            inputDiv.id = 'labelContent';
+            inputDiv.id = 'taskContent';
             inputDiv.innerHTML = `
-                <input type="text" class="form-control" placeholder="Enter label" id="labelInput">
+                <input type="text" class="form-control" placeholder="Enter task" id="taskInput">
                 <div class="input-group-append">
-                    <button class="btn btn-success" id="saveLabelBtn">Save</button>
+                    <button class="btn btn-success" id="saveTaskBtn">Save</button>
                 </div>
             `;
             noteCard.querySelector('.card-body').appendChild(inputDiv);
 
-            document.getElementById('saveLabelBtn').onclick = function() {
-                const label = document.getElementById('labelInput').value.trim();
-                if (!label) {
-                    alert('Please enter a label.');
+            document.getElementById('saveTaskBtn').onclick = function() {
+                const task = document.getElementById('taskInput').value.trim();
+                if (!task) {
+                    alert('Please enter a task.');
                     return;
                 }
-                fetch('/Note-Management-Web/Note-Web/controllers/labels.php', {
+                fetch('/Note-Management-Web/Note-Web/controllers/tasks.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
                     body: new URLSearchParams({
                         note_id: noteId,
-                        name: label,
+                        name: task,
                         action: 'create'
                     })
                 })
@@ -480,9 +481,9 @@
                 .then(data => {
                     if (data.status === 'success') {
                         fetchNotes();
-                        fetchLabels(noteId);
+                        fetchTasks(noteId);
                     } else {
-                        alert('Error adding label: ' + data.message);
+                        alert('Error adding task: ' + data.message);
                     }
                 })
                 .catch(error => {
@@ -491,8 +492,8 @@
             };
         }
 
-        function fetchLabels(noteId) {
-            return fetch('/Note-Management-Web/Note-Web/controllers/labels.php', {
+        function fetchTasks(noteId) {
+            return fetch('/Note-Management-Web/Note-Web/controllers/tasks.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -505,9 +506,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    return data.labels;
+                    return data.tasks;
                 } else {
-                    console.error('Error fetching labels:', data.message);
+                    console.error('Error fetching tasks:', data.message);
                     return [];
                 }
             })
@@ -568,7 +569,6 @@
 
         document.getElementById('editBtn').addEventListener('click', () =>{
             ['firstNameUser', 'lastNameUser', 'emailUser', 'ageUser', 'phoneUser'].forEach(id => {
-            ['firstNameUser', 'lastNameUser', 'ageUser', 'phoneUser'].forEach(id => {
                 document.getElementById(id).readOnly = false;
             });
         });
@@ -616,7 +616,6 @@
             });
         });
 
-    });
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
@@ -624,4 +623,3 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
 </body>
 </html>
-
