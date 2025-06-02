@@ -89,8 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const pinIconClass = note.is_pinned == 1 ? 'bi bi-pin-angle' : 'bi bi-pin-angle-fill';
                     
             const noteCard = document.createElement('div');
-            noteCard.className = `card note-card mb-3 ${note.is_pinned ? 'pinned-note' : ''}`;
-                    
+            noteCard.className = `card note-card mb-3 ${(note.is_pinned == 1) ? 'pinned-note' : ''}`;         
             noteCard.innerHTML = `
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
@@ -109,6 +108,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function toggleNotePin(noteId) {
+        fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                id: noteId,
+                action: 'togglePin'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                fetchNotes();       
+            } else {
+                alert('Error updating pin status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Connection error:', error);
+        });
+    }
+
+    document.getElementById('notesList').addEventListener('click', function(e) {
+            if (e.target.classList.contains('pin-icon')) {
+                const noteId = e.target.getAttribute('data-id');
+                toggleNotePin(noteId);
+            }
+        });     
+            
     document.getElementById('notesList').addEventListener('click', function(e) {
         if (e.target && e.target.classList.contains('delete-btn')) {
             const noteId = e.target.getAttribute('data-id');
