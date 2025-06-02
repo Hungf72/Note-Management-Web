@@ -23,8 +23,8 @@ create table notes (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-create table labels (
-    label_id int primary key AUTO_INCREMENT,
+create table tasks (
+    tasks_id int primary key AUTO_INCREMENT,
     name varchar(255) not null,
     note_id int not null,
     user_id int not null,
