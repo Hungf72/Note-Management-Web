@@ -187,6 +187,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchNotes();
 
+            const email = localStorage.getItem("email");
+            if (!email) {
+                setTimeout(() => {
+                    
+                }, 1000);
+            }
+
             document.getElementById("noteForm").addEventListener("submit", function (e) {
                 e.preventDefault();
                 const noteId = this.getAttribute("data-id");
