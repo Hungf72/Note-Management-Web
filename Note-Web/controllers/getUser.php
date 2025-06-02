@@ -18,6 +18,7 @@ echo json_encode([
     'firstName' => $user['firstName'],
     'lastName' => $user['lastName'],
     'age' => $user['age'],
-    'phone' => $user['phone']
+    'phone' => $user['phone'],
+    'avatar' => isset($user['avatar']) ? $user['avatar'] : null
 ]);
 ?>
