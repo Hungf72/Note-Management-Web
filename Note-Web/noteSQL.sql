@@ -23,16 +23,6 @@ create table notes (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-create table tasks (
-    tasks_id int primary key AUTO_INCREMENT,
-    name varchar(255) not null,
-    note_id int not null,
-    user_id int not null,
-    created_at timestamp default CURRENT_TIMESTAMP,
-    FOREIGN KEY (note_id) REFERENCES notes(id) on delete cascade,
-    FOREIGN KEY (user_id) REFERENCES users(id) on delete cascade
-);
-
 alter table notes add column is_pinned boolean default false;
 alter table notes add column pinned_order int default null;
 
