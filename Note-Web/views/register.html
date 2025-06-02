@@ -5,118 +5,141 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <title>Note App - Sign Up</title>
-  <style>
-    img{
-        width: 30%;
-    }
 
-    label,h4{
-        font-weight: 500;
+  <title>NotezyNeko - Sign Up</title>
+    <style>
+    body { background-color: #0f172a; }
+    .circle {
+      position: absolute; border-radius: 9999px;
+      filter: blur(70px); opacity: 0.6; animation: float 8s ease-in-out infinite;
     }
+    .circle.red {
+      background: linear-gradient(to bottom, #b91c1c, #f97316);
+      width: 320px; height: 320px; top: 5%; left: 10%;
+    }
+    .circle.pink {
+      background: linear-gradient(to right, #db2777, #9333ea);
+      width: 320px; height: 320px; top: 60%; left: 12%;
+    }
+    .circle.blue {
+      background: #3b82f6;
+      width: 320px; height: 320px; top: 5%; right: 12%;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(20px); }
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .input-style {
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      padding: 1rem;
+      color: white;
+      width: 100%;
+    }
+    .input-style::placeholder {
+      color: #d1d5db;
+    }
+    .input-style:focus {
+      outline: none;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+    input::-ms-reveal,
+	input::-ms-clear,
+	input::-webkit-credentials-auto-fill-button {
+		display: none !important;
+		pointer-events: none;
+	}
   </style>
 </head>
-<body>
-    <div class="container d-flex justify-content-center align-items-center vh-100">
-        <div class="card p-4 shadow">
-            <div class="card-body">
+<body class="flex items-center justify-center min-h-screen relative overflow-hidden text-white">
 
-                <div class="text-center">
-                    <a href="register.html">
-                        <img src="/Note-Management-Web/Note-Web/images/noteImage.png" alt="Note App Logo">
-                    </a>
-                </div>
+  <!-- background -->
+  <div class="circle red"></div>
+  <div class="circle pink"></div>
+  <div class="circle blue"></div>
 
-                <h3 class="card-title text-center mb-4">Create Account</h3>
-                <form id="registerForm" method="post" action="/Note-Management-Web/Note-Web/controllers/register.php">
+  <!-- form -->
+  <div class="glass z-10 w-[90%] max-w-xl p-8 sm:p-10 text-white shadow-xl">
+    <h2 class="text-3xl font-bold mb-6 text-center">Create Account</h2>
+    <form class="space-y-5">
 
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                        <label for="lastname">Last Name</label>
-                        <input name="lastname" type="text" class="form-control" id="lastname" placeholder="Nguyễn" required>
-                        </div>
-                        <div class="form-group col-md-6">
-                        <label for="firstname">First Name</label>
-                        <input name="firstname" type="text" class="form-control" id="firstname" placeholder="Văn A" required>
-                        </div>
-                    </div>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <input type="text" placeholder="Last Name" class="input-style" required />
+        <input type="text" placeholder="First Name" class="input-style" required />
+      </div>
 
-                    <div class="form-group">
-                        <label for="age">Age</label>
-                        <input name="age" type="number" class="form-control" id="age" placeholder="Tuổi" min="1" max="100" required>
-                    </div>
+      <input type="number" placeholder="Age" class="input-style" min="1" step="1" required />
 
-                    <div class="form-group">
-                        <label for="phone">Phone number</label>
-                        <input name="phone" type="tel" class="form-control" id="phone" placeholder="0901234567" pattern="[0-9]{10,11}" required>
-                    </div>
+      <input type="text" placeholder="Phone Number" class="input-style" pattern="^\d{8,}$" required />
 
-                    <div class="form-group">
-                        <label for="email"><i class="fas fa-envelope"></i> Email</label>
-                        <input name="email" type="email" class="form-control" id="email" placeholder="example@email.com" required>
-                    </div>
+      <input type="email" placeholder="Email" class="input-style" required />
 
-                    <div class="form-group">
-                        <label for="password"><i class="fas fa-lock"></i> Mật khẩu</label>
-                        <div class="input-group">
-                            <input name="password" type="password" class="form-control" id="password" placeholder="Tạo mật khẩu" required>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                    <i class="fas fa-eye" id="toggleIcon"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+      <div class="relative">
+        <input type="password" id="password" placeholder="Password" class="input-style pr-12" required />
+        <button type="button" id="togglePassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white text-lg">
+          <i id="eyeOpen" class="fas fa-eye hidden"></i>
+          <i id="eyeSlash" class="fas fa-eye-slash"></i>
+        </button>
+      </div>
 
-                    <div class="form-group">
-                        <label for="confirmPassword"><i class="fas fa-lock"></i> Xác nhận mật khẩu</label>
-                        <div class="input-group">
-                            <input name="confirm_password" type="password" class="form-control" id="confirmPassword" placeholder="Nhập lại mật khẩu" required>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
-                                    <i class="fas fa-eye" id="toggleConfirmIcon"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+      <div class="relative">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" class="input-style pr-12" required />
+        <button type="button" id="toggleConfirm" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white text-lg">
+          <i id="eyeOpen2" class="fas fa-eye hidden"></i>
+          <i id="eyeSlash2" class="fas fa-eye-slash"></i>
+        </button>
+      </div>
 
-                    <button type="submit" class="btn btn-success btn-block">
-                        <i class="fas fa-user-plus"></i> Đăng ký
-                    </button>
+      <button type="submit"
+        class="w-full p-3 bg-green-600 hover:bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-lg font-semibold transition-all">
+        <i class="fas fa-user-plus mr-1"></i> Register
+      </button>
 
-                    <div class="text-center mt-3">
-                    <small>Đã có tài khoản? <a href="login.html">Đăng nhập</a></small>
-                    </div>
-
-                </form>
-            </div>
-        </div>
-    </div>
+      <p class="text-center text-sm text-gray-300 mt-4">
+        Already have an account? <a href="login.html" class="underline hover:text-pink-300">Log in</a>
+      </p>
+    </form>
+  </div>
 
     <!-- message dialog -->
-    <div class="modal fade" id="message-dialog">
-        <div class="modal-dialog">
-           <div class="modal-content">
-                <div class="modal-header justify-content-center">
-                    <h4 class="modal-title text-center">Thông báo</h4>
-                </div>
-    
-                <div class="modal-body">
-                    <!-- hien thong bao o day -->
-                    <p id="modalMessage"></p>
-                </div>
-            
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Đóng</button>
-                </div>            
-           </div>
-        </div>
+    <div class="fixed inset-0 z-20 bg-black/50 hidden items-center justify-center" id="modal">
+    <div class="bg-white text-black rounded-lg p-6 w-[90%] max-w-md text-center">
+      <h4 class="text-lg font-semibold mb-4">Notifications</h4>
+      <p id="modalMessage" class="mb-4"></p>
+      <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="document.getElementById('modal').classList.add('hidden')">Close</button>
     </div>
+  </div>
   
 
   <script>
+    const toggle = (inputId, openId, slashId) => {
+      const input = document.getElementById(inputId);
+      const eyeOpen = document.getElementById(openId);
+      const eyeSlash = document.getElementById(slashId);
+
+      const isText = input.type === "text";
+      input.type = isText ? "password" : "text";
+
+      eyeOpen.classList.toggle("hidden", isText);
+      eyeSlash.classList.toggle("hidden", !isText);
+    };
+    document.getElementById("togglePassword").addEventListener("click", () => {
+      toggle("password", "eyeOpen", "eyeSlash");
+    });
+
+    document.getElementById("toggleConfirm").addEventListener("click", () => {
+      toggle("confirmPassword", "eyeOpen2", "eyeSlash2");
+    });
+
     document.getElementById("registerForm").addEventListener("submit", function(e) {
         e.preventDefault();
 
@@ -146,21 +169,6 @@
         });
     });
 
-    document.getElementById("togglePassword").addEventListener("click", function () {
-      const pwd = document.getElementById("password");
-      const icon = document.getElementById("toggleIcon");
-      pwd.type = pwd.type === "password" ? "text" : "password";
-      icon.classList.toggle("fa-eye");
-      icon.classList.toggle("fa-eye-slash");
-    });
-
-    document.getElementById("toggleConfirmPassword").addEventListener("click", function () {
-      const pwd = document.getElementById("confirmPassword");
-      const icon = document.getElementById("toggleConfirmIcon");
-      pwd.type = pwd.type === "password" ? "text" : "password";
-      icon.classList.toggle("fa-eye");
-      icon.classList.toggle("fa-eye-slash");
-    });
   </script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
