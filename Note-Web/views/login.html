@@ -166,8 +166,8 @@
             const remember = document.getElementById("rememberMe").checked;
 
             fetch("/Note-Management-Web/Note-Web/controllers/login.php", {
-                method: "POST",
-                body: formData
+              method: "POST",
+              body: formData
             })
             .then(response => response.json())
             .then(data => {
@@ -175,16 +175,20 @@
                 $('#message-dialog').modal('show');
 
                 if (data.status === "success") {
-                    localStorage.setItem('email',data.email);
-                    setTimeout(() => {
-                        window.location.href = "home.html";
-                    }, 1000);
+                  localStorage.setItem('email',data.email);
+
+                  document.getElementById("modalMessage").textContent = data.message;
+                  $('#message-dialog').modal('show');
+
+                  setTimeout(() => {
+                    window.location.href = "home.html";
+                  }, 1000);
                 }
             })
             .catch(error => {
-                console.error("Lỗi:", error);
-                document.getElementById("modalMessage").textContent = "Đã xảy ra lỗi!";
-                $('#message-dialog').modal('show');
+              console.error("Lỗi:", error);
+              document.getElementById("modalMessage").textContent = "Đã xảy ra lỗi!";
+              $('#message-dialog').modal('show');
             });
         });
 
