@@ -132,31 +132,26 @@
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="lastNameUser">Last Name</label>
-                        <input name="lastname" type="text" class="form-control" id="lastNameUser" placeholder="Huynh" required>
                         <input name="lastname" type="text" class="form-control" id="lastNameUser" placeholder="Huynh" required readonly>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="firstNameUser">First Name</label>
-                        <input name="firstname" type="text" class="form-control" id="firstNameUser" placeholder="Kyle" required> 
                         <input name="firstname" type="text" class="form-control" id="firstNameUser" placeholder="Kyle" required readonly> 
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="emailUser">Email</label>
-                    <input name="email" type="email" class="form-control" id="emailUser" placeholder="example@email.com" required>
                     <input name="email" type="email" class="form-control" id="emailUser" placeholder="example@email.com" required readonly>
                 </div>
 
                 <div class="form-group">
                     <label for="ageUser">Age</label>
-                    <input name="age" type="number" class="form-control" id="ageUser" placeholder="Age" min="1" max="100" required>
                     <input name="age" type="number" class="form-control" id="ageUser" placeholder="Age" min="1" max="100" required readonly>
                 </div>
 
                 <div class="form-group">
                     <label for="phoneUser">Phone number</label>
-                    <input name="phone" type="tel" class="form-control" id="phoneUser" placeholder="0901234567" pattern="[0-9]{10,11}" required>
                     <input name="phone" type="tel" class="form-control" id="phoneUser" placeholder="0901234567" pattern="[0-9]{10,11}" required readonly>
                 </div>
 
@@ -196,8 +191,7 @@
                 e.preventDefault();
                 const noteId = this.getAttribute("data-id");
                 const title = document.getElementById("noteTitle").value.trim();
-                const content =
-                    document.getElementById("noteContent").value.trim();
+                const content = document.getElementById("noteContent").value.trim();
 
                 if (!title || !content) {
                     alert("Both title and content are required.");
@@ -388,7 +382,20 @@
             });
         }
 
-        
+        fetch('/Note-Management-Web/Note-Web/controllers/getUser.php', {
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const userName = document.getElementById('userName');
+                userName.textContent = data.firstName + ' ' + data.lastName;
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi khi lấy user:', error);
+        });
+
         });
 
         // khi an logout remove localStorage
@@ -422,7 +429,9 @@
         // show information
         document.getElementById("userInfo").addEventListener("click", () => {
             document.getElementById('popup-card').style.display = 'flex';
-            fetch('/Note-Management-Web/Note-Web/controllers/getUser.php')
+            fetch('/Note-Management-Web/Note-Web/controllers/getUser.php', {
+                credentials: 'include'
+            })
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
@@ -439,7 +448,7 @@
         });
 
         document.getElementById('editBtn').addEventListener('click', () =>{
-            ['firstNameUser', 'lastNameUser', 'emailUser', 'ageUser', 'phoneUser'].forEach(id => {
+            ['firstNameUser', 'lastNameUser', 'ageUser', 'phoneUser'].forEach(id => {
                 document.getElementById(id).readOnly = false;
             });
         });
@@ -461,7 +470,9 @@
                 if (data.status === "success") {
                     location.reload();
                     // Cập nhật lại input và tên user mà không reload trang
-                    fetch('/Note-Management-Web/Note-Web/controllers/getUser.php')
+                    fetch('/Note-Management-Web/Note-Web/controllers/getUser.php', {
+                        credentials: 'include'
+                    })
                     .then(res => res.json())
                     .then(user => {
                         if (user.status === 'success') {
@@ -470,6 +481,7 @@
                             document.getElementById('lastNameUser').value = user.lastName;
                             document.getElementById('ageUser').value = user.age;
                             document.getElementById('phoneUser').value = user.phone;
+
                             const userName = document.getElementById('userName');
                             userName.textContent = user.firstName + ' ' + user.lastName;
                         }
