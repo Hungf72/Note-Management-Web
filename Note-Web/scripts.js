@@ -86,11 +86,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         notes.forEach(note => {
+            const pinIconClass = note.is_pinned == 1 ? 'bi bi-pin-angle' : 'bi bi-pin-angle-fill';
+                    
             const noteCard = document.createElement('div');
-            noteCard.className = 'card note-card';
+            noteCard.className = `card note-card mb-3 ${note.is_pinned ? 'pinned-note' : ''}`;
+                    
             noteCard.innerHTML = `
                 <div class="card-body">
-                    <h5 class="card-title">${note.title}</h5>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 class="card-title">${note.title}</h5>
+                        <i class="${pinIconClass} pin-icon" data-id="${note.id}" ></i>
+                    </div>
                     <p class="card-text">${note.content || ''}</p>
                     <div class="d-flex align-items-center">
                         <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
@@ -100,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             notesList.appendChild(noteCard);
-
         });
     }
 
