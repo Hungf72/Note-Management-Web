@@ -50,6 +50,21 @@
             transform: scale(1.5) !important;
         }
 
+        .label-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .note-label {
+            background-color: #007bff;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+
         .popup-container {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -274,21 +289,30 @@
             }
 
             notes.forEach(note => {
-                const noteCard = document.createElement('div');
-                noteCard.className = 'card note-card';
-                noteCard.innerHTML = `
-                    <div class="card-body" style="max-width: 50%;">
-                        <h5 class="card-title">${note.title}</h5>
-                        <div class="d-flex align-items-center">
-                            <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
-                            <button class="btn btn-sm btn-secondary add-label-btn pl-3 pr-3 ml-3" data-id="${note.id}">Add label</button>
-                            <button class="btn btn-sm btn-primary edit-btn pl-3 pr-3 ml-3" data-id="${note.id}">Edit</button>
-                            <button class="btn btn-sm btn-danger delete-btn pl-3 pr-3 ml-3" data-id="${note.id}">Delete</button>
-                        </div>
-                    </div>
-                `;
-                notesList.appendChild(noteCard);
+                fetchLabels(note.id).then(labels => {
+                    const noteCard = document.createElement('div');
+                    noteCard.className = 'card note-card mb-3';
+                    
+                    const labelElements = Array.isArray(labels) ? labels.map(label => `<span class="note-label">${label.name}</span>`).join('') : '';
 
+                    noteCard.innerHTML = `
+                        <div class="card-body">
+                            <h5 class="card-title">${note.title}</h5>
+                            <div class="label-container">
+                                ${labelElements}
+                            </div>
+                            <div class="d-flex align-items-center mt-2">
+                                <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
+                                <button class="btn btn-sm btn-secondary add-label-btn ml-3" data-id="${note.id}">Add label</button>
+                                <button class="btn btn-sm btn-primary edit-btn ml-3" data-id="${note.id}">Edit</button>
+                                <button class="btn btn-sm btn-danger delete-btn ml-3" data-id="${note.id}">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    notesList.appendChild(noteCard);
+                }).catch(error => {
+                    console.error('Error fetching labels for note:', note.id, error);
+                });
             });
         }
 
@@ -306,16 +330,26 @@
             }
         });   
         
-        document.getElementById('notesList').addEventListener('click', function(e) {
-            if (e.target && e.target.classList.contains('add-label-btn')) {
-                const noteId = e.target.getAttribute('data-id');
-                addLabel(noteId);
-            }
+        document.getElementById('note-label').addEventListener('click', function(e) {
+            console.log('Add label button clicked');
         });
+
+        document.getElementById
         
         function deleteNote(noteId) {
             if (!confirm('Bạn muốn xóa note này?')) return;
 
+            fetch(`/Note-Management-Web/Note-Web/controllers/labels.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    note_id: noteId,
+                    label_id: '',
+                    action: 'delete'
+                })
+            })
             fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
                 method: 'POST',
                 headers: {
@@ -418,7 +452,7 @@
             inputDiv.className = 'input-group mt-2';
             inputDiv.id = 'labelContent';
             inputDiv.innerHTML = `
-                <input type="text" class="form-control" placeholder="Enter label" id="labelContent">
+                <input type="text" class="form-control" placeholder="Enter label" id="labelInput">
                 <div class="input-group-append">
                     <button class="btn btn-success" id="saveLabelBtn">Save</button>
                 </div>
@@ -426,7 +460,7 @@
             noteCard.querySelector('.card-body').appendChild(inputDiv);
 
             document.getElementById('saveLabelBtn').onclick = function() {
-                const label = document.getElementById('labelContent').value.trim();
+                const label = document.getElementById('labelInput').value.trim();
                 if (!label) {
                     alert('Please enter a label.');
                     return;
@@ -445,7 +479,8 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        fetchLabels();
+                        fetchNotes();
+                        fetchLabels(noteId);
                     } else {
                         alert('Error adding label: ' + data.message);
                     }
@@ -457,8 +492,15 @@
         }
 
         function fetchLabels(noteId) {
-            return fetch(`/Note-Management-Web/Note-Web/controllers/labels.php?note_id=${noteId}`, {
-                method: 'GET'
+            return fetch('/Note-Management-Web/Note-Web/controllers/labels.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    note_id: noteId,
+                    action: 'get'
+                })
             })
             .then(response => response.json())
             .then(data => {
@@ -583,12 +625,3 @@
 </body>
 </html>
 
-<<<<<<< HEAD
-
-<!-- if (link && isActivated !== 'true') {
-                const msgBox = document.getElementById('activationMsg');
-                msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
-                msgBox.style.display = 'block';
-            } -->
-=======
->>>>>>> c57248d9b69c8d46fc27195a4dcb06c27c0dd464
