@@ -10,7 +10,7 @@
         $noteId = $_POST['note_id'] ?? null;
 
         if (!$userId) {
-            echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để xem nhãn.']);
+            echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để xem task.']);
             exit;
         }
 
@@ -88,19 +88,19 @@
             $userId = $_SESSION['user']['id'] ?? null;
 
             if (!$userId) {
-                echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để cập nhật nhãn.']);
+                echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để cập nhật task.']);
                 exit;
             }
 
             if (empty($taskId) || empty($name)) {
-                echo json_encode(['status' => 'error', 'message' => 'ID nhãn và tên nhãn không được để trống.']);
+                echo json_encode(['status' => 'error', 'message' => 'ID task và tên task không được để trống.']);
                 exit;
             }
 
             try {
                 $stmt = $pdo->prepare("UPDATE tasks SET name = :name WHERE tasks_id = :id AND user_id = :user_id");
                 $stmt->execute(['name' => $name, 'id' => $taskId, 'user_id' => $userId]);
-                echo json_encode(['status' => 'success', 'message' => 'Nhãn đã được cập nhật thành công.']);
+                echo json_encode(['status' => 'success', 'message' => 'task đã được cập nhật thành công.']);
             } catch (PDOException $e) {
                 echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
             }
