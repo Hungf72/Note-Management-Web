@@ -108,7 +108,7 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h5>Create New Note</h5>
+                <h5 id="noteFormHeader">Create New Note</h5>
             </div>
             <div class="card-body">
                 <form id="noteForm">
@@ -116,7 +116,11 @@
                         <label for="noteTitle">Title</label>
                         <input type="text" class="form-control" id="noteTitle" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Create Note</button>
+                    <div class="form-group">
+                        <label for="noteContent">Content</label>
+                        <textarea class="form-control" id="noteContent" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="noteFormBtn">Create Note</button>
                 </form>
             </div>
         </div>
@@ -195,44 +199,39 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             fetchNotes();
+            let editingNoteId = null;
 
-            document.getElementById('noteForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                createNote();
-            });
-
-            const email = localStorage.getItem('email');
-
-            if (!email) {
-                console.log('Chưa có email để kiểm tra kích hoạt.');
-                return;
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 1000);
-            }
-
-            alert(email)
-
-            fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(email)}`, {
-                method: 'GET'
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    if (!data.is_active) {
-                        const link = localStorage.getItem('activation_link'); // <-- thêm dòng này
-                        const msgBox = document.getElementById('activationMsg');
-                        msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
-                        msgBox.style.display = 'block';
-                    }
-                } 
-                else{
-                    console.error('Lỗi server:', data.message);
+            function createNote() {
+                const title = document.getElementById('noteTitle').value.trim();
+                const content = document.getElementById('noteContent').value.trim();
+                if (!title) {
+                    alert('Title is required.');
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('Lỗi kết nối:', error);
-            });
+                fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        title,
+                        content,
+                        action: 'create'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        resetNoteForm();
+                        fetchNotes();
+                    } else {
+                        alert('Error creating note: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi kết nối:', error);
+                });
+            }
 
             function fetchNotes() {
             fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
@@ -252,33 +251,6 @@
             });
         }
 
-        function createNote() {
-            const title = document.getElementById('noteTitle').value;
-
-            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    title,
-                    action: 'create'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    document.getElementById('noteTitle').value = '';
-                    fetchNotes();
-                } else {
-                    alert('Error creating note: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi kết nối:', error);
-            });
-        }
-
         function displayNotes(notes) {
             const notesList = document.getElementById('notesList');
             notesList.innerHTML = '';
@@ -289,30 +261,21 @@
             }
 
             notes.forEach(note => {
-                fetchTasks(note.id).then(tasks => {
-                    const noteCard = document.createElement('div');
-                    noteCard.className = 'card note-card mb-3';
-                    
-                    const taskElements = Array.isArray(tasks) ? tasks.map(task => `<span class="note-task">${task.name}</span>`).join('') : '';
-
-                    noteCard.innerHTML = `
-                        <div class="card-body">
-                            <h5 class="card-title">${note.title}</h5>
-                            <div class="task-container">
-                                ${taskElements}
-                            </div>
-                            <div class="d-flex align-items-center mt-2">
-                                <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
-                                <button class="btn btn-sm btn-secondary add-task-btn ml-3" data-id="${note.id}">Add more texts</button>
-                                <button class="btn btn-sm btn-primary edit-btn ml-3" data-id="${note.id}">Edit</button>
-                                <button class="btn btn-sm btn-danger delete-btn ml-3" data-id="${note.id}">Delete</button>
-                            </div>
+                const noteCard = document.createElement('div');
+                noteCard.className = 'card note-card';
+                noteCard.innerHTML = `
+                    <div class="card-body" style="max-width: 50%;">
+                        <h5 class="card-title">${note.title}</h5>
+                        <p class="card-text">${note.content}</p>
+                        <div class="d-flex align-items-center">
+                            <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
+                            <button class="btn btn-sm btn-primary edit-btn pl-3 pr-3 ml-3" data-id="${note.id}">Edit</button>
+                            <button class="btn btn-sm btn-danger delete-btn pl-3 pr-3 ml-3" data-id="${note.id}">Delete</button>
                         </div>
-                    `;
-                    notesList.appendChild(noteCard);
-                }).catch(error => {
-                    console.error('Error fetching tasks for note:', note.id, error);
-                });
+                    </div>
+                `;
+                notesList.appendChild(noteCard);
+
             });
         }
 
@@ -329,13 +292,6 @@
                 editNote(noteId);
             }
         });   
-        
-        document.getElementById('notesList').addEventListener('click', function(e) {
-            if (e.target && e.target.classList.contains('add-task-btn')) {
-                const noteId = e.target.getAttribute('data-id');
-                addTask(noteId);
-            }
-        });
 
         function deleteNote(noteId) {
             if (!confirm('Bạn muốn xóa note này?')) return;
@@ -386,26 +342,10 @@
             .then(data => {
                 if (data.status === 'success') {
                     document.getElementById('noteTitle').value = data.note.title;
-
-                    const form = document.getElementById('noteForm');
-                    form.setAttribute('data-id', noteId);
-                    form.querySelector('button[type="submit"]').textContent = 'Update Note';
-
-                    const newForm = form.cloneNode(true);
-                    form.parentNode.replaceChild(newForm, form);
-
-                    newForm.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        updateNote(noteId);
-                        this.querySelector('button[type="submit"]').textContent = 'Create Note';
-                        this.removeAttribute('data-id');
-                        
-                        this.reset();
-                        this.addEventListener('submit', function(e) {
-                            e.preventDefault();
-                            createNote();
-                        });
-                    });
+                    document.getElementById('noteContent').value = data.note.content;
+                    document.getElementById('noteFormBtn').textContent = 'Update Note';
+                    document.getElementById('noteFormHeader').textContent = 'Edit Note';
+                    editingNoteId = noteId;
                 } else {
                     alert('Error fetching note: ' + data.message);
                 }
@@ -416,8 +356,12 @@
         }
 
         function updateNote(noteId) {
-            const title = document.getElementById('noteTitle').value;
-
+            const title = document.getElementById('noteTitle').value.trim();
+            const content = document.getElementById('noteContent').value.trim();
+            if (!title) {
+                alert('Title is required.');
+                return;
+            }
             fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
                 method: 'POST',
                 headers: {
@@ -425,14 +369,15 @@
                 },
                 body: new URLSearchParams({
                     id: noteId,
-                    title: title,
+                    title,
+                    content,
                     action: 'autosave'
                 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    document.getElementById('noteTitle').value = '';
+                    resetNoteForm();
                     fetchNotes();
                 } else {
                     alert('Error updating note: ' + data.message);
@@ -443,80 +388,6 @@
             });
         }
 
-        function addTask(noteId) {
-            const oldInput = document.getElementById('taskContent');
-            if (oldInput) oldInput.remove();
-
-            const noteCard = document.querySelector(`.note-card .add-task-btn[data-id="${noteId}"]`).closest('.note-card');
-
-            const inputDiv = document.createElement('div');
-            inputDiv.className = 'input-group mt-2';
-            inputDiv.id = 'taskContent';
-            inputDiv.innerHTML = `
-                <input type="text" class="form-control" placeholder="Enter task" id="taskInput">
-                <div class="input-group-append">
-                    <button class="btn btn-success" id="saveTaskBtn">Save</button>
-                </div>
-            `;
-            noteCard.querySelector('.card-body').appendChild(inputDiv);
-
-            document.getElementById('saveTaskBtn').onclick = function() {
-                const task = document.getElementById('taskInput').value.trim();
-                if (!task) {
-                    alert('Please enter a task.');
-                    return;
-                }
-                fetch('/Note-Management-Web/Note-Web/controllers/tasks.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        note_id: noteId,
-                        name: task,
-                        action: 'create'
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        fetchNotes();
-                        fetchTasks(noteId);
-                    } else {
-                        alert('Error adding task: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Lỗi kết nối:', error);
-                });
-            };
-        }
-
-        function fetchTasks(noteId) {
-            return fetch('/Note-Management-Web/Note-Web/controllers/tasks.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    note_id: noteId,
-                    action: 'get'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    return data.tasks;
-                } else {
-                    console.error('Error fetching tasks:', data.message);
-                    return [];
-                }
-            })
-            .catch(error => {
-                console.error('Connection error:', error);
-                return [];
-            });
-        }
         
         });
 
