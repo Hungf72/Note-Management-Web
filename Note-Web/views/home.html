@@ -125,7 +125,10 @@
             <form id="userForm">
                 <div class="form-group">
                     <div class="d-flex justify-content-center align-items-center">
-                        <img id="userInfo" src="/Note-Management-Web/Note-Web/images/personal.png" alt="User Icon" class="rounded-circle mr-2">
+                        <label for="popupAvatarInput" style="margin-bottom:0;cursor:pointer;">
+                            <img id="popupUserInfo" src="/Note-Management-Web/Note-Web/images/personal.png" alt="User Icon" class="rounded-circle mr-2">
+                            <input type="file" id="popupAvatarInput" accept="image/*" style="display:none;">
+                        </label>
                     </div>
                 </div>
 
@@ -398,10 +401,24 @@
                 if (data.status === 'success') {
                     const userName = document.getElementById('userName');
                     userName.textContent = data.firstName + ' ' + data.lastName;
-                }
-                else{
+                    // Set avatar for sidebar and popup
+                    let avatarUrl = data.avatar;
+                    if (avatarUrl) {
+                        if (!avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
+                        avatarUrl = avatarUrl.replace(/\\/g, '/');
+                        if (!avatarUrl.startsWith('/Note-Management-Web/Note-Web/images/avatars/')) {
+                            avatarUrl = '/Note-Management-Web/Note-Web/' + avatarUrl.replace(/^\/*/, '');
+                        }
+                    } else {
+                        avatarUrl = '/Note-Management-Web/Note-Web/images/personal.png';
+                    }
+                    document.getElementById('userInfo').src = avatarUrl;
+                    document.getElementById('popupUserInfo').src = avatarUrl;
+                } else {
                     const userName = document.getElementById('userName');
                     userName.textContent = 'Guest';
+                    document.getElementById('userInfo').src = '/Note-Management-Web/Note-Web/images/personal.png';
+                    document.getElementById('popupUserInfo').src = '/Note-Management-Web/Note-Web/images/personal.png';
                 }
             })
             .catch(error => {
@@ -473,7 +490,7 @@
                 }
             })
             .catch(error => {
-                console.error('Lỗi khi lấy user:', error);
+                document.getElementById('popup-card').style.display = 'flex';
             });
         });
 
@@ -488,6 +505,15 @@
             e.preventDefault();
             const formData = new FormData(this);
 
+            const popupAvatar = document.getElementById('popupUserInfo');
+            const sidebarAvatar = document.getElementById('userInfo');
+            const popupAvatarInput = document.getElementById('popupAvatarInput');
+            let avatarChanged = false;
+            if (popupAvatarInput.files && popupAvatarInput.files[0]) {
+                formData.append('avatar', popupAvatarInput.files[0]);
+                avatarChanged = true;
+            }
+
             fetch('/Note-Management-Web/Note-Web/controllers/updateUser.php', {
                 method: 'POST',
                 body: formData
@@ -498,8 +524,6 @@
                 $('#message-dialog').modal('show');
 
                 if (data.status === "success") {
-                    location.reload();
-                    // Cập nhật lại input và tên user mà không reload trang
                     fetch('/Note-Management-Web/Note-Web/controllers/getUser.php', {
                         credentials: 'include'
                     })
@@ -514,8 +538,22 @@
 
                             const userName = document.getElementById('userName');
                             userName.textContent = user.firstName + ' ' + user.lastName;
-                        }
 
+                            // Update avatar everywhere after save
+                            let avatarUrl = user.avatar;
+                            if (avatarUrl) {
+                                if (!avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
+                                avatarUrl = avatarUrl.replace(/\\/g, '/');
+                                if (!avatarUrl.startsWith('/Note-Management-Web/Note-Web/images/avatars/')) {
+                                    avatarUrl = '/Note-Management-Web/Note-Web/' + avatarUrl.replace(/^\/*/, '');
+                                }
+                            } else {
+                                avatarUrl = '/Note-Management-Web/Note-Web/images/personal.png';
+                            }
+                            document.getElementById('userInfo').src = avatarUrl;
+                            document.getElementById('popupUserInfo').src = avatarUrl;
+                        }
+                        
                         ['firstNameUser', 'lastNameUser', 'ageUser', 'phoneUser'].forEach(id => {
                             document.getElementById(id).readOnly = true;
                         });
@@ -529,6 +567,20 @@
             });
         });
 
+        // avatar change
+        document.getElementById('popupAvatarInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('popupUserInfo').src = evt.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        });
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
