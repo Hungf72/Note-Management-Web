@@ -33,7 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user']['age'] = $age;
             $_SESSION['user']['phone'] = $phone;
             echo json_encode(["status" => "success", "message" => "Cập nhật thành công"]);
-        } else {
+        } 
+        else {
             echo json_encode(["status" => "error", "message" => "Cập nhật thất bại"]);
         }
     } catch (PDOException $e) {
