@@ -172,13 +172,13 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById("modalMessage").textContent = data.message;
-                $('#message-dialog').modal('show');
+                document.getElementById('modal').classList.remove('hidden');
 
                 if (data.status === "success") {
                   localStorage.setItem('email',data.email);
 
                   document.getElementById("modalMessage").textContent = data.message;
-                  $('#message-dialog').modal('show');
+                  document.getElementById('modal').classList.remove('hidden');
 
                   setTimeout(() => {
                     window.location.href = "home.html";
@@ -188,7 +188,7 @@
             .catch(error => {
               console.error("Lỗi:", error);
               document.getElementById("modalMessage").textContent = "Đã xảy ra lỗi!";
-              $('#message-dialog').modal('show');
+              document.getElementById('modal').classList.remove('hidden');
             });
         });
 
