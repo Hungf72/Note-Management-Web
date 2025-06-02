@@ -14,7 +14,7 @@
         }
 
         try {
-            $stmt = $pdo->prepare("SELECT * FROM notes WHERE user_id = :user_id");
+            $stmt = $pdo->prepare("SELECT * FROM notes WHERE user_id = :user_id ORDER BY is_pinned ASC, CASE WHEN is_pinned = 1 THEN pinned_order END DESC, last_modified ASC");
             $stmt->execute(['user_id' => $userId]);
             $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode(['status' => 'success', 'notes' => $notes]);
@@ -129,6 +129,46 @@
         }
     }
 
+    function togglePin() {
+        global $pdo;
+        $noteId = $_POST['id'] ?? null;
+        $userId = $_SESSION['user']['id'] ?? null;
+
+        if (!$userId || !$noteId) {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
+            exit;
+        }
+
+        try {
+            $stmt = $pdo->prepare("SELECT is_pinned FROM notes WHERE id = :id AND user_id = :user_id");
+            $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
+            $note = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$note) {
+                echo json_encode(['status' => 'error', 'message' => 'Note not found']);
+                exit;
+            }
+            $newPinStatus = !$note['is_pinned'];
+            
+            if ($newPinStatus) {
+                $stmt = $pdo->prepare("SELECT COALESCE(MAX(pinned_order), 0) + 1 as next_order FROM notes WHERE user_id = :user_id AND is_pinned = 1");
+                $stmt->execute(['user_id' => $userId]);
+                $nextOrder = $stmt->fetch(PDO::FETCH_ASSOC)['next_order'];
+                
+                $stmt = $pdo->prepare("UPDATE notes SET is_pinned = 1, pinned_order = :order WHERE id = :id AND user_id = :user_id");
+                $stmt->execute(['order' => $nextOrder, 'id' => $noteId, 'user_id' => $userId]);
+            } else {
+                $stmt = $pdo->prepare("UPDATE notes SET is_pinned = 0, pinned_order = NULL WHERE id = :id AND user_id = :user_id");
+                $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
+            }
+
+            echo json_encode(['status' => 'success', 'message' => 'Note pin status updated']);
+        } catch (PDOException $e) {
+            echo json_encode(['status' => 'error', 'message' => 'System error: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $id = $_GET['id'] ?? null;
         $action = $_GET['action'] ?? '';
@@ -149,6 +189,9 @@
                 break;
             case 'autosave':
                 autoSaveNOTES();
+                break;
+            case 'togglePin':
+                togglePin();
                 break;
             default:
                 echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
