@@ -188,9 +188,10 @@
             fetchNotes();
 
             const email = localStorage.getItem("email");
+            alert(email);
             if (!email) {
                 setTimeout(() => {
-                    
+                    window.location.href = "login.html";
                 }, 1000);
             }
 
@@ -261,147 +262,169 @@
             });
         }
 
-        function displayNotes(notes) {
-            const notesList = document.getElementById('notesList');
-            notesList.innerHTML = '';
+            function displayNotes(notes) {
+                const notesList = document.getElementById('notesList');
+                notesList.innerHTML = '';
 
-            if (notes.length === 0) {
-                notesList.innerHTML = '<p class="text-center">No notes found.</p>';
-                return;
-            }
+                if (notes.length === 0) {
+                    notesList.innerHTML = '<p class="text-center">No notes found.</p>';
+                    return;
+                }
 
-            notes.forEach(note => {
-                const noteCard = document.createElement('div');
-                noteCard.className = 'card note-card';
-                noteCard.innerHTML = `
-                    <div class="card-body">
-                        <h5 class="card-title">${note.title}</h5>
-                        <p class="card-text">${note.content || ''}</p>
-                        <div class="d-flex align-items-center">
-                            <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
-                            <button class="btn btn-sm btn-primary edit-btn pl-3 pr-3 ml-3" data-id="${note.id}">Edit</button>
-                            <button class="btn btn-sm btn-danger delete-btn pl-3 pr-3 ml-3" data-id="${note.id}">Delete</button>
+                notes.forEach(note => {
+                    const noteCard = document.createElement('div');
+                    noteCard.className = 'card note-card';
+                    noteCard.innerHTML = `
+                        <div class="card-body">
+                            <h5 class="card-title">${note.title}</h5>
+                            <p class="card-text">${note.content || ''}</p>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
+                                <button class="btn btn-sm btn-primary edit-btn pl-3 pr-3 ml-3" data-id="${note.id}">Edit</button>
+                                <button class="btn btn-sm btn-danger delete-btn pl-3 pr-3 ml-3" data-id="${note.id}">Delete</button>
+                            </div>
                         </div>
-                    </div>
-                `;
-                notesList.appendChild(noteCard);
+                    `;
+                    notesList.appendChild(noteCard);
 
+                });
+            }
+
+            document.getElementById('notesList').addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('delete-btn')) {
+                    const noteId = e.target.getAttribute('data-id');
+                    deleteNote(noteId);
+                }
             });
-        }
 
-        document.getElementById('notesList').addEventListener('click', function(e) {
-            if (e.target && e.target.classList.contains('delete-btn')) {
-                const noteId = e.target.getAttribute('data-id');
-                deleteNote(noteId);
-            }
-        });
+            document.getElementById('notesList').addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('edit-btn')) {
+                    const noteId = e.target.getAttribute('data-id');
+                    editNote(noteId);
+                }
+            });   
 
-        document.getElementById('notesList').addEventListener('click', function(e) {
-            if (e.target && e.target.classList.contains('edit-btn')) {
-                const noteId = e.target.getAttribute('data-id');
-                editNote(noteId);
-            }
-        });   
+            function deleteNote(noteId) {
+                if (!confirm('Bạn muốn xóa note này?')) return;
 
-        function deleteNote(noteId) {
-            if (!confirm('Bạn muốn xóa note này?')) return;
-
-            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    id: noteId,
-                    action: 'delete'
+                fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        id: noteId,
+                        action: 'delete'
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    const form = document.getElementById('noteForm');
-                    form.removeAttribute('data-id');
-                    form.reset();
-                    form.querySelector('button[type="submit"]').textContent = 'Create Note';
-                    fetchNotes();
-                } else {
-                    alert('Error deleting note: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi kết nối:', error);
-            });
-        }
-
-        function editNote(noteId) {
-            fetch(`/Note-Management-Web/Note-Web/controllers/notes.php?id=${noteId}&action=edit`, {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    document.getElementById('noteTitle').value = data.note.title;
-                    document.getElementById('noteContent').value = data.note.content;
-                    document.getElementById('noteFormBtn').textContent = 'Update Note';
-                    document.getElementById('noteFormHeader').textContent = 'Edit Note';
-                    document.getElementById("noteForm").setAttribute("data-id", noteId);
-                } else {
-                    alert('Error fetching note: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi kết nối:', error);
-            });
-        }
-
-        function updateNote(noteId) {
-            const title = document.getElementById('noteTitle').value.trim();
-            const content = document.getElementById('noteContent').value.trim();
-            if (!title) {
-                alert('Title is required.');
-                return;
-            }
-            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    id: noteId,
-                    title,
-                    content,
-                    action: 'autosave'
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const form = document.getElementById('noteForm');
+                        form.removeAttribute('data-id');
+                        form.reset();
+                        form.querySelector('button[type="submit"]').textContent = 'Create Note';
+                        fetchNotes();
+                    } else {
+                        alert('Error deleting note: ' + data.message);
+                    }
                 })
+                .catch(error => {
+                    console.error('Lỗi kết nối:', error);
+                });
+            }
+
+            function editNote(noteId) {
+                fetch(`/Note-Management-Web/Note-Web/controllers/notes.php?id=${noteId}&action=edit`, {
+                    method: 'GET'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('noteTitle').value = data.note.title;
+                        document.getElementById('noteContent').value = data.note.content;
+                        document.getElementById('noteFormBtn').textContent = 'Update Note';
+                        document.getElementById('noteFormHeader').textContent = 'Edit Note';
+                        document.getElementById("noteForm").setAttribute("data-id", noteId);
+                    } else {
+                        alert('Error fetching note: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi kết nối:', error);
+                });
+            }
+
+            function updateNote(noteId) {
+                const title = document.getElementById('noteTitle').value.trim();
+                const content = document.getElementById('noteContent').value.trim();
+                if (!title) {
+                    alert('Title is required.');
+                    return;
+                }
+                fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        id: noteId,
+                        title,
+                        content,
+                        action: 'autosave'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('noteTitle').value = '';
+                        document.getElementById('noteContent').value = '';
+                        document.getElementById('noteFormBtn').textContent = 'Create Note';
+                        fetchNotes();
+                    } else {
+                        alert('Error updating note: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi kết nối:', error);
+                });
+            }
+
+            fetch('/Note-Management-Web/Note-Web/controllers/getUser.php', {
+                credentials: 'include'
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    document.getElementById('noteTitle').value = '';
-                    document.getElementById('noteContent').value = '';
-                    document.getElementById('noteFormBtn').textContent = 'Create Note';
-                    fetchNotes();
-                } else {
-                    alert('Error updating note: ' + data.message);
+                    const userName = document.getElementById('userName');
+                    userName.textContent = data.firstName + ' ' + data.lastName;
+                }
+                else{
+                    const userName = document.getElementById('userName');
+                    userName.textContent = 'Guest';
                 }
             })
             .catch(error => {
-                console.error('Lỗi kết nối:', error);
+                console.error('Lỗi khi lấy user:', error);
             });
-        }
 
-        fetch('/Note-Management-Web/Note-Web/controllers/getUser.php', {
-            credentials: 'include'
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                const userName = document.getElementById('userName');
-                userName.textContent = data.firstName + ' ' + data.lastName;
-            }
-        })
-        .catch(error => {
-            console.error('Lỗi khi lấy user:', error);
-        });
+            // active account
+            fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(localStorage.getItem('email'))}`)
+            .then(res => res.json())
+            .then(data => {
+                const msgBox = document.getElementById('activationMsg');
+                if (data.status === 'success' && !data.is_active) {
+                    const link = localStorage.getItem('activation_link');
+                    msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
+                    msgBox.style.display = 'block';
+                } 
+                else {
+                    msgBox.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi kiểm tra kích hoạt:', error);
+            });
 
         });
 
