@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <style>
         body {
@@ -72,6 +73,19 @@
             cursor: pointer !important;
             width: 80x;
             height: 80px;
+        }
+
+        .pinned-note {
+            border-left: 4px solid #007bff;
+        }
+        .pin-icon {
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.2s;
+        }
+        .pin-icon.pinned {
+            color: #007bff;
+            transform: rotate(-45deg);
         }
     </style>
 </head>
@@ -189,6 +203,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             fetchNotes();
+            
 
             const email = localStorage.getItem("email");
             alert(email);
@@ -221,6 +236,7 @@
                     alert('Title is required.');
                     return;
                 }
+                document.getElementById("noteForm").setAttribute("data-id", null);
                 fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
                     method: 'POST',
                     headers: {
@@ -275,11 +291,17 @@
                 }
 
                 notes.forEach(note => {
+                    const pinIconClass = note.is_pinned == 1 ? 'bi bi-pin-angle' : 'bi bi-pin-angle-fill';
+                    
                     const noteCard = document.createElement('div');
-                    noteCard.className = 'card note-card';
+                    noteCard.className = `card note-card mb-3 ${note.is_pinned ? 'pinned-note' : ''}`;
+                    
                     noteCard.innerHTML = `
                         <div class="card-body">
-                            <h5 class="card-title">${note.title}</h5>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title">${note.title}</h5>
+                                <i class="${pinIconClass} pin-icon" data-id="${note.id}" ></i>
+                            </div>
                             <p class="card-text">${note.content || ''}</p>
                             <div class="d-flex align-items-center">
                                 <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
@@ -289,7 +311,31 @@
                         </div>
                     `;
                     notesList.appendChild(noteCard);
+                });
+            }
 
+            function toggleNotePin(noteId) {
+                fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        id: noteId,
+                        action: 'togglePin'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        fetchNotes(); 
+                        
+                    } else {
+                        alert('Error updating pin status: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Connection error:', error);
                 });
             }
 
@@ -305,7 +351,14 @@
                     const noteId = e.target.getAttribute('data-id');
                     editNote(noteId);
                 }
-            });   
+            });  
+            
+            document.getElementById('notesList').addEventListener('click', function(e) {
+                if (e.target.classList.contains('pin-icon')) {
+                    const noteId = e.target.getAttribute('data-id');
+                    toggleNotePin(noteId);
+                }
+            });
 
             function deleteNote(noteId) {
                 if (!confirm('Bạn muốn xóa note này?')) return;
