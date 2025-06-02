@@ -16,15 +16,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $age       = $_POST['age'] ?? '';
     $phone     = trim($_POST['phone'] ?? '');
 
+    $avatarPath = null;
+    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . '/../images/avatars/';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $ext = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+        
+        // Use only user's sanitized firstname for filename
+        $safeFirstName = preg_replace('/[^a-zA-Z0-9]/', '', $firstName);
+        $fileName = 'avatar_' . $safeFirstName . '.' . $ext;
+        $filePath = $uploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['avatar']['tmp_name'], $filePath)) {
+            $avatarPath = 'images/avatars/' . $fileName;
+        }
+    }
+
     try {
-        $update = $pdo->prepare("UPDATE users SET firstName = :firstName, lastName = :lastName, age = :age, phone = :phone WHERE email = :email");
-        $success = $update->execute([
+        $sql = "UPDATE users SET firstName = :firstName, lastName = :lastName, age = :age, phone = :phone";
+        $params = [
             ':firstName' => $firstName,
             ':lastName' => $lastName,
             ':age' => $age,
             ':phone' => $phone,
             ':email' => $email
-        ]);
+        ];
+        if ($avatarPath) {
+            $sql .= ", avatar = :avatar";
+            $params[':avatar'] = $avatarPath;
+        }
+        $sql .= " WHERE email = :email";
+        $update = $pdo->prepare($sql);
+        $success = $update->execute($params);
 
         if ($success) {
             // Update session user info after successful update
@@ -32,7 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user']['lastName'] = $lastName;
             $_SESSION['user']['age'] = $age;
             $_SESSION['user']['phone'] = $phone;
-            echo json_encode(["status" => "success", "message" => "Cập nhật thành công"]);
+            if ($avatarPath) {
+                $_SESSION['user']['avatar'] = $avatarPath;
+            }
+            echo json_encode(["status" => "success", "message" => "Cập nhật thành công", "avatar" => $avatarPath]);
         } 
         else {
             echo json_encode(["status" => "error", "message" => "Cập nhật thất bại"]);
