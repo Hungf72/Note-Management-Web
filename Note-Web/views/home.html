@@ -64,15 +64,6 @@
             margin-top: 10px;
         }
 
-        .popup-container {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1050;
-        }
 
         #userForm img{
             transition: transform 0.3s ease !important;
@@ -95,13 +86,16 @@
             color: #007bff;
             transform: rotate(-45deg);
         }
-
-        #settingsPage {
-            display: none;
-        }
+        
     </style>
+    
+    <!-- darkmode style -->
+    <link rel="stylesheet" href="/Note-Management-Web/Note-Web/darkmodeStyle.css">
+
+    <!-- user Info style -->
+    <link rel="stylesheet" href="/Note-Management-Web/Note-Web/userInfo.css">
 </head>
-<body>
+<body class="light-mode">
 
     <!-- sidebar -->
     <div class="sidebar">
@@ -156,22 +150,22 @@
         <div id="notesList"></div>
     </div>
 
-    <!-- pop up modal-->
+    <!-- pop up userinfo modal-->
     <div id="popupModal" class="card shadow-lg border-0" style="display:none; position: fixed; top: 60px; left: 20px; width: 280px; z-index: 1050; border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);">
         <div class="card-body p-4">
             <div class="d-flex align-items-center mb-2">
                 <div class="ml-2">
-                    <div id="nameAccount" style="font-weight: bold; font-size: 1.1rem; color: #222;">Name</div>
-                    <div id="gmailAccount" style="font-size: 0.92rem; color: #6c757d;">gmail</div>
+                    <div id="nameAccount" class="popup-user-name">Name</div>
+                    <div id="gmailAccount" class="popup-user-email">gmail</div>
                 </div>
             </div>
             <hr class="my-2">
 
             <div class="list-group list-group-flush">
                 <a href="accountInfo.html" class="list-group-item list-group-item-action border-0 d-flex align-items-center" style="border-radius: 8px;">
-                    <i class="fas fa-user mr-2 text-primary"></i> <span>Account info</span>
+                    <i class="fas fa-user mr-2 text-primary"></i> <span>Account Info</span>
                 </a>
-                <a href="setting.html" class="list-group-item list-group-item-action border-0 d-flex align-items-center" style="border-radius: 8px;">
+                <a href="#" id="openSettingsPopup" class="list-group-item list-group-item-action border-0 d-flex align-items-center" style="border-radius: 8px;">
                     <i class="fas fa-cog mr-2 text-success"></i> <span>Settings</span>
                 </a>
                 <a href="#" class="list-group-item list-group-item-action border-0 d-flex align-items-center" style="border-radius: 8px;">
@@ -181,23 +175,57 @@
         </div>
     </div>
 
-    <!-- message dialog -->
-    <div class="modal fade" id="message-dialog">
-        <div class="modal-dialog">
-           <div class="modal-content">
-                <div class="modal-header justify-content-center">
-                    <h4 class="modal-title text-center">Thông báo</h4>
-                </div>
+    <!-- background khi pop up -->
+    <div id="settingsOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(30, 34, 40, 0.35); z-index: 1049;"></div>
 
-                <div class="modal-body">
-                    <!-- hien thong bao o day -->
-                    <p id="modalMessage"></p>
-                </div>
+    <!-- settings popup -->
+    <div id="settingsPopup" class="card shadow-lg border-0" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90vw; max-width: 850px; border-radius: 16px; overflow: hidden; z-index: 1050;">
+        <div class="d-flex flex-column flex-md-row" style="min-height: 520px;">
+            <!-- Sidebar -->
+            <div class="border-end bg-light" style="width: 100%; max-width: 240px; padding: 28px 18px 18px 18px;">
+                <h6 class="text-uppercase text-muted mb-3" style="letter-spacing: 1px; font-size: 0.95rem;">Settings</h6>
+                <ul class="nav flex-column settings-nav">
+                    <li class="nav-item mb-1"><a class="nav-link active rounded-pill px-3 py-2" href="#"><i class="fas fa-sliders-h me-2"></i> Preferences</a></li>
+                    <li class="nav-item mb-1"><a class="nav-link rounded-pill px-3 py-2" href="#"><i class="fas fa-file-import me-2"></i> Import</a></li>
+                    <li class="nav-item mb-1"><a class="nav-link rounded-pill px-3 py-2" href="#"><i class="fas fa-lock me-2"></i> Login and Security</a></li>
+                    <li class="nav-item mb-1"><a class="nav-link rounded-pill px-3 py-2" href="accountInfo.html"><i class="fas fa-user me-2"></i> Personal Info</a></li>
+                    <li class="nav-item mt-2"><a class="nav-link rounded-pill px-3 py-2 text-warning fw-bold" href="#"><i class="fas fa-star me-2"></i> Upgrade</a></li>
+                </ul>
+            </div>
+            <!-- Content -->
+            <div class="flex-fill p-5 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0 fw-bold">Settings</h4>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Đóng</button>
-                </div>            
-           </div>
+                    <button class="btn btn-light btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center" id="closeSettingsPopup" style="width:32px;height:32px;line-height:1;box-shadow:none;border:none;">
+                        <span aria-hidden="true" style="font-size:1.5rem;line-height:1;">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                </div>
+                <div>
+                    <h6 class="fw-semibold">Appearance</h6>
+                    <div class="d-flex align-items-end mb-3" style="gap: 32px;">
+                        <div id="lightMode" class="text-center" style="flex:1; cursor:pointer;">
+                            <input class="form-check-input mb-2" type="radio" name="appearance" id="appearanceLight" style="margin-bottom: 12px;" checked>
+                            <label class="form-check-label mb-2" for="appearanceLight" style="font-size: 1rem; cursor:pointer;">Light mode</label>
+                            <img src="/Note-Management-Web/Note-Web/images/lightmodes.png" alt="Light mode preview" style="width: 220px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; background: #f8f9fa; display: block; cursor:pointer;" id="imgLightMode">
+                        </div>
+                        <div id="darkMode" class="text-center" style="flex:1; cursor:pointer;">
+                            <input class="form-check-input mb-2" type="radio" name="appearance" id="appearanceDark" style="margin-bottom: 12px;">
+                            <label class="form-check-label mb-2" for="appearanceDark" style="font-size: 1rem; cursor:pointer;">Dark mode</label>
+                            <img src="/Note-Management-Web/Note-Web/images/darkmodes.png" alt="Dark mode preview" style="width: 220px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; background: #23272b; display: block; cursor:pointer;" id="imgDarkMode">
+                        </div>
+                    </div>
+                </div>
+                <hr>   
+                <div>
+                    <h6 class="fw-semibold">Language</h6>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="spellCheck" checked>
+                        <label class="form-check-label" for="spellCheck">Check spelling while typing</label>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -236,6 +264,17 @@
 
                     const gmailAccount = document.getElementById('gmailAccount');
                     gmailAccount.textContent = data.email;
+
+                    // hien avatar
+                    let avatarUrl = data.avatar;
+                    if (avatarUrl) {
+                        avatarUrl = '/Note-Management-Web/Note-Web/' + avatarUrl;
+                    } 
+                    else {
+                        avatarUrl = '/Note-Management-Web/Note-Web/images/personal.png';
+                    }
+                    document.getElementById('userInfo').src = avatarUrl;
+                    updatePopupAvatar(avatarUrl);
                 }
             })
             .catch(error => {
@@ -272,14 +311,130 @@
             document.getElementById('popupModal').style.display = 'block';
         });
 
+        // open settings popup from popupModal
+        document.getElementById('openSettingsPopup').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('settingsPopup').style.display = 'block';
+            document.getElementById('settingsOverlay').style.display = 'block';
+            document.getElementById('popupModal').style.display = 'none';
+        });
+
+        // close settings popup
+        document.getElementById('closeSettingsPopup').addEventListener('click', function() {
+            document.getElementById('settingsPopup').style.display = 'none';
+            document.getElementById('settingsOverlay').style.display = 'none';
+        });
+
+        // close settings popup with button (x)
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.getElementById('settingsPopup').style.display = 'none';
+                document.getElementById('settingsOverlay').style.display = 'none';
+            }
+        });
+
         // close popup modal khi click ra ngoài
         document.addEventListener('mousedown', function(event) {
-            const popup = document.getElementById('popupModal');
-            if (popup.style.display === 'block'&& !popup.contains(event.target) && event.target.id !== 'userInfo') {
-                popup.style.display = 'none';
+            const popupAcc = document.getElementById('popupModal');
+            const popupSettings = document.getElementById('settingsPopup');
+            const settingsOverlay = document.getElementById('settingsOverlay');
+
+            if (popupAcc.style.display === 'block'&& !popupAcc.contains(event.target) && event.target.id !== 'userInfo') {
+                popupAcc.style.display = 'none';
+            }
+
+            if (popupSettings.style.display === 'block' && !popupSettings.contains(event.target) && event.target.id !== 'openSettingsPopup') {
+                popupSettings.style.display = 'none';
+                settingsOverlay.style.display = 'none';
+            }
+            if (settingsOverlay.style.display === 'block' && event.target === settingsOverlay) {
+                popupSettings.style.display = 'none';
+                settingsOverlay.style.display = 'none';
+            }
+        });
+
+        function applyAppearance(mode) {
+            if (mode === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.body.classList.remove('light-mode');
+            } else {
+                document.body.classList.add('light-mode');
+                document.body.classList.remove('dark-mode');
+            }
+        }
+
+        function getThemeKey() {
+            const email = localStorage.getItem('email') || 'default';
+            return 'themeMode_' + email;
+        }
+
+ 
+        const themeKey = getThemeKey();
+        const savedMode = localStorage.getItem(themeKey);
+        if (savedMode === 'dark') {
+            document.getElementById('appearanceDark').checked = true;
+            applyAppearance('dark');
+        } 
+        else if (savedMode === 'light') {
+            document.getElementById('appearanceLight').checked = true;
+            applyAppearance('light');
+        } 
+        else if (document.getElementById('appearanceDark').checked) {
+            applyAppearance('dark');
+        } 
+        else {
+            applyAppearance('light');
+        }
+
+        // Save mode to localStorage (per user) when changed
+        function selectAppearance(mode) {
+            document.getElementById('appearanceLight').checked = (mode === 'light');
+            document.getElementById('appearanceDark').checked = (mode === 'dark');
+            localStorage.setItem(getThemeKey(), mode); // Save to localStorage per user
+            applyAppearance(mode);
+        }
+
+        // Click image, label, or container to select radio button for appearance
+        document.getElementById('imgLightMode').addEventListener('click', function() {
+            selectAppearance('light');
+        });
+        document.getElementById('imgDarkMode').addEventListener('click', function() {
+            selectAppearance('dark');
+        });
+
+        document.getElementById('lightMode').addEventListener('click', function(e) {
+            
+            selectAppearance('light');
+        });
+        document.getElementById('darkMode').addEventListener('click', function(e) {
+            selectAppearance('dark');
+        });
+
+        document.querySelector('label[for="appearanceLight"]').addEventListener('click', function() {
+            selectAppearance('light');
+        });
+        document.querySelector('label[for="appearanceDark"]').addEventListener('click', function() {
+            selectAppearance('dark');
+        });
+
+        document.getElementById('appearanceLight').addEventListener('change', function() {
+            if (this.checked) {
+                applyAppearance('light');
+            }
+        });
+        document.getElementById('appearanceDark').addEventListener('change', function() {
+            if (this.checked) {
+                applyAppearance('dark');
             }
         });
         
+        // Update avatar in popup userinfo modal
+        function updatePopupAvatar(url) {
+            var avatar = document.getElementById('popupAvatar');
+            if (avatar) {
+                avatar.src = url || '/Note-Management-Web/Note-Web/images/personal.png';
+            }
+        }
     </script>
 
     <script src="/Note-Management-Web/Note-Web/scripts.js"></script>
