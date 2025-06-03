@@ -35,6 +35,11 @@
             background-color: #495057;
         }
 
+        .sidebar-link.active {
+            background-color: #495057;
+            color: #fff;
+        }
+
         .main-content {
             flex-grow: 1;
             padding: 20px;
@@ -78,15 +83,18 @@
         .pinned-note {
             border-left: 4px solid #007bff;
         }
+        
         .pin-icon {
             cursor: pointer;
             color: #6c757d;
             transition: color 0.2s;
         }
+
         .pin-icon.pinned {
             color: #007bff;
             transform: rotate(-45deg);
         }
+
         #settingsPage {
             display: none;
         }
@@ -96,15 +104,16 @@
 
     <!-- sidebar -->
     <div class="sidebar">
+        <!-- welcome user -->
         <div class="d-flex justify-content-center align-items-center mb-4">
             <img id="userInfo" src="/Note-Management-Web/Note-Web/images/personal.png" alt="User Icon" class="rounded-circle mr-2">
             <h5 class="mb-0"><span id="userName">Guest</span></h5>
         </div>
 
-        <a href="#"><i class="fas fa-home"></i> Dashboard</a>
-        <a href="#"><i class="fas fa-sticky-note"></i> Notes</a>
-        <a href="#" id="sidebarSettings"><i class="fas fa-cog"></i> Cài đặt</a>
-        <a href="login.html" id="logOut"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <a href="home.html" class="sidebar-link active" id="sidebarHome"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="sidebar-link" id="sidebarNotes"><i class="fas fa-sticky-note"></i> Notes</a>
+        <a href="#" class="sidebar-link" id="sidebarSettings"><i class="fas fa-user-friends"></i> Sharing</a>
+        <a href="login.html" class="sidebar-link" id="logOut"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
     <!-- main content -->
@@ -145,8 +154,10 @@
 
         <div id="notesList"></div>
     </div>
+
+    <!-- pop up modal-->
     
-    <!-- pop up contain user information-->
+    <!-- user information-->
     <div id="popup-card" class="popup-container" style="display:none;">
         <div class="popup-body bg-white p-4 rounded shadow" style="width: 380px">
             <form id="userForm">
@@ -217,78 +228,13 @@
     <div id="settingsPageContainer" style="display:none;"></div>
 
     <script>
-        // Settings page dynamic loading
-        document.getElementById('sidebarSettings').addEventListener('click', function(e) {
-            e.preventDefault();
+       
 
-            const mainContent = document.querySelector('.container.mt-5');
-            const settingsContainer = document.getElementById('settingsPageContainer');
-
-            // Hide main content
-            if (mainContent) {
-                mainContent.style.display = 'none';
-            }
-
-            // Show settings container
-            settingsContainer.style.display = 'block';
-
-            // Load setting.html vào container
-            fetch('/Note-Management-Web/Note-Web/views/setting.html')
-            .then(res => res.text())
-            .then(html => {
-                settingsContainer.innerHTML = html;
-                // Gắn lại sự kiện cho nút Quay lại
-                // const backBtn = document.getElementById('changePwdBackBtn');
-                // if (backBtn) {
-                //     backBtn.onclick = function() {
-                //         settingsContainer.style.display = 'none';
-                //         if (mainContent) mainContent.style.display = 'block';
-                //     };
-                // }
-                // // Gắn lại sự kiện submit đổi mật khẩu
-                // const form = document.getElementById('changePasswordForm');
-                // if (form) {
-                //     form.onsubmit = function(e) {
-                //         e.preventDefault();
-                //         const currentPassword = document.getElementById('currentPassword').value.trim();
-                //         const newPassword = document.getElementById('newPassword').value.trim();
-                //         const confirmPassword = document.getElementById('confirmPassword').value.trim();
-                //         const msgBox = document.getElementById('changePwdMsg');
-                //         msgBox.textContent = '';
-                //         if (!currentPassword || !newPassword || !confirmPassword) {
-                //             msgBox.textContent = 'Vui lòng nhập đầy đủ thông tin.';
-                //             msgBox.style.color = 'red';
-                //             return;
-                //         }
-                //         if (newPassword !== confirmPassword) {
-                //             msgBox.textContent = 'Mật khẩu mới không khớp.';
-                //             msgBox.style.color = 'red';
-                //             return;
-                //         }
-                //         fetch('/Note-Management-Web/Note-Web/controllers/updatepwd.php', {
-                //             method: 'POST',
-                //             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                //             body: new URLSearchParams({
-                //                 currentPassword,
-                //                 newPassword,
-                //                 action: 'changePassword',
-                //                 email: localStorage.getItem('email')
-                //             })
-                //         })
-                //         .then(res => res.json())
-                //         .then(data => {
-                //             msgBox.textContent = data.message;
-                //             msgBox.style.color = data.status === 'success' ? 'green' : 'red';
-                //             if (data.status === 'success') {
-                //                 form.reset();
-                //             }
-                //         })
-                //         .catch(() => {
-                //             msgBox.textContent = 'Có lỗi xảy ra, vui lòng thử lại.';
-                //             msgBox.style.color = 'red';
-                //         });
-                //     };
-                // }
+        // Sidebar active state toggle
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function() {
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
             });
         });
     </script>
