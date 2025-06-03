@@ -22,14 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         displayNotes(filteredNotes);
     });
     
-    const email = localStorage.getItem("email");
-    alert(email);
-    if (!email) {
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 1000);
-    }
-    
     fetchNotes();
     fetchLabels();
 
