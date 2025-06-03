@@ -1,8 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     let allLabels = [];
-    let currentLabelFilter = [];
-    let isEditingLabels = false;
     let allNotes = []; // Store all notes for searching
+    let isEditingLabels = false;
     
     document.getElementById('searchNotes').addEventListener('input', function(e) {
         const searchTerm = e.target.value.toLowerCase();
@@ -11,7 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!allNotes.length) return;
 
         if (searchTerm) {
-            filteredNotes = allNotes.filter(note =>note.title.toLowerCase().includes(searchTerm) || note.content.toLowerCase().includes(searchTerm)
+            filteredNotes = allNotes.filter(note =>note.title.toLowerCase().includes(searchTerm) || note.content.toLowerCase().includes(searchTerm) || (note.labels && note.labels.some(labelId => {
+                const label = allLabels.find(label => label.id == labelId);
+                return label && label.name.toLowerCase().includes(searchTerm);
+            }))
             );
         } else {
             filteredNotes = allNotes;
@@ -27,9 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = "login.html";
         }, 1000);
     }
-
+    
     fetchNotes();
-    //fetchLabels();
+    fetchLabels();
 
     document.getElementById("noteForm").addEventListener("submit", function (e) {
         e.preventDefault();
@@ -49,31 +51,169 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function fetchLabels() {
+    const labelsList = document.getElementById('labelsList');
+    const addLabelBtn = document.getElementById('addLabelBtn');
+    const addLabelInputGroup = document.getElementById('addLabelInputGroup');
+    const newLabelName = document.getElementById('newLabelName');
+    const saveNewLabelBtn = document.getElementById('saveNewLabelBtn');
+    const cancelNewLabelBtn = document.getElementById('cancelNewLabelBtn');
+
+    function displayLabels(labels) {
+        labelsList.innerHTML = '';
+        labels.forEach(label => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `
+                <span class="label-name" data-id="${label.id}">${label.name}</span>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary editLabelBtn" data-id="${label.id}" data-name="${label.name}"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger deleteLabelBtn" data-id="${label.id}"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            labelsList.appendChild(li);
+        });
+    }
+
+    function refreshLabels() {
+        fetchLabels();
+    }
+
+    addLabelBtn.addEventListener('click', () => {
+        addLabelInputGroup.style.display = 'flex';
+        newLabelName.value = '';
+        newLabelName.focus();
+    });
+
+    cancelNewLabelBtn.addEventListener('click', () => {
+        addLabelInputGroup.style.display = 'none';
+        newLabelName.value = '';
+    });
+
+    saveNewLabelBtn.addEventListener('click', () => {
+        if (isEditingLabels) return; // Prevent creating a new label while editing
+
+        const name = newLabelName.value.trim();
+        if (!name) return;
         fetch('/Note-Management-Web/Note-Web/controllers/labels.php', {
-            method: 'GET'
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded' 
+            },
+            body: new URLSearchParams({ 
+                name, 
+                action: 'create' 
+            })
         })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                addLabelInputGroup.style.display = 'none';
+                newLabelName.value = '';
+                refreshLabels();
+            } else {
+                alert(data.message);
+            }
+        });
+    });
+
+    labelsList.addEventListener('click', function(e) {
+        if (e.target.closest('.editLabelBtn')) {
+            const btn = e.target.closest('.editLabelBtn');
+            const id = btn.getAttribute('data-id');
+            const oldName = btn.getAttribute('data-name');
+            editLabel(id, oldName);
+        }
+        else if (e.target.closest('.deleteLabelBtn')) {
+            const btn = e.target.closest('.deleteLabelBtn');
+            const id = btn.getAttribute('data-id');
+            deleteLabel(id);
+        }
+    });
+                
+
+    function deleteLabel(labelId) {
+        if (confirm('Delete this label?')) {
+            fetch('/Note-Management-Web/Note-Web/controllers/labels.php', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/x-www-form-urlencoded' 
+                },
+                body: new URLSearchParams({ 
+                    id: labelId, 
+                    action: 'delete' 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success'){
+                    refreshLabels();
+                    fetchNotes();
+                }
+                else{
+                    alert(data.message);
+                }
+            });
+        }
+    }
+
+    function editLabel(labelId, oldName) {
+        addLabelInputGroup.style.display = 'flex';
+        newLabelName.value = oldName;
+        newLabelName.focus();
+        isEditingLabels = true;
+        saveNewLabelBtn.onclick = function() {
+            renameLabel(labelId, oldName);
+        };
+    }
+
+    function renameLabel(labelId, oldName) {
+        const newName = newLabelName.value.trim();
+        if (newName && newName.trim() && newName !== oldName) {
+            fetch('/Note-Management-Web/Note-Web/controllers/labels.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ 
+                    id: labelId, 
+                    name: newName.trim(), 
+                    action: 'update' 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success'){
+                    refreshLabels();
+                    isEditingLabels = false;
+                    saveNewLabelBtn.onclick = null; // Reset the click handler
+                    addLabelInputGroup.style.display = 'none';
+                    newLabelName.value = '';
+                }
+                else{
+                    alert(data.message);
+                }
+            })
+            .catch(err => console.error('Error renaming label:', err));
+        }
+    }
+
+
+    // Fetch and show labels on load
+    function fetchLabels() {
+        fetch('/Note-Management-Web/Note-Web/controllers/labels.php', { method: 'GET' })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
                 allLabels = data.labels;
-                // displayLabels(allLabels);
+                displayLabels(allLabels);
             }
-            else {
-                console.error('Error fetching labels:', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Connection error:', error);
         });
     }
-
 
     function createNote(title, content) {
         if (!title) {
             alert('Title is required.');
             return;
         }
+        const selectedLabels = Array.from(noteLabelsSelect.selectedOptions).map(opt => opt.value);
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
             method: 'POST',
             headers: {
@@ -82,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
             body: new URLSearchParams({
                 title,
                 content,
+                labels: selectedLabels.join(','),
                 action: 'create'
             })
         })
@@ -108,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             if (data.status === 'success') {
                 allNotes = data.notes; // Store all notes for searching
+                fetchLabelsAndUpdateSelect(); // Ensure labels are updated
                 displayNotes(data.notes);
             } else {
                 console.error('Lỗi khi lấy notes:', data.message);
@@ -119,6 +261,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const noteLabelsSelect = document.getElementById('noteLabels');
+
+    function updateNoteLabelsSelect() {
+        noteLabelsSelect.innerHTML = '';
+        allLabels.forEach(label => {
+            const option = document.createElement('option');
+            option.value = label.id;
+            option.textContent = label.name;
+            noteLabelsSelect.appendChild(option);
+        });
+    }
+
+    // Update label select when labels change
+    function fetchLabelsAndUpdateSelect() {
+        fetchLabels();
+        updateNoteLabelsSelect();
+    }
+
+    // When creating/editing a note, set selected labels
+    function setSelectedLabels(labelIds) {
+        Array.from(noteLabelsSelect.options).forEach(opt => {
+            opt.selected = labelIds && labelIds.includes(parseInt(opt.value));
+        });
+    }
+
+    // When submitting note form, collect selected labels
+    document.getElementById("noteForm").addEventListener("submit", function (e) {
+        const selectedLabels = Array.from(noteLabelsSelect.selectedOptions).map(opt => opt.value);
+        this.setAttribute('data-labels', selectedLabels.join(','));
+    });
+
+    // When displaying notes, show their labels
     function displayNotes(notes) {
         const notesList = document.getElementById('notesList');
         notesList.innerHTML = '';
@@ -141,12 +315,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const pinIconClass = note.is_pinned == 1 ? 'bi bi-pin-angle-fill' : 'bi bi-pin-angle';
             const noteCard = document.createElement('div');
             noteCard.className = `card note-card mb-3 ${note.is_pinned == 1 ? 'pinned-note' : ''}`;
+            // Show labels as badges
+            let labelBadges = '';
+            if (note.labels && note.labels.length) {
+                labelBadges = note.labels.map(lid => {
+                    const label = allLabels.find(l => l.id == lid);
+                    return label ? `<span class='badge badge-info mr-1'>${label.name}</span>` : '';
+                }).join('');
+            }
             noteCard.innerHTML = `
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <h5 class="card-title">${note.title}</h5>
                         <i class="${pinIconClass} pin-icon" data-id="${note.id}" ></i>
                     </div>
+                    <div>${labelBadges}</div>
                     <p class="card-text">${note.content || ''}</p>
                     <div class="d-flex align-items-center">
                         <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
@@ -158,6 +341,14 @@ document.addEventListener('DOMContentLoaded', () => {
             notesList.appendChild(noteCard);
         });
     }
+
+    addLabelBtn.addEventListener('click', updateNoteLabelsSelect);
+    saveNewLabelBtn.addEventListener('click', fetchLabelsAndUpdateSelect);
+    labelsList.addEventListener('click', function(e) {
+        if (e.target.closest('.deleteLabelBtn') || e.target.closest('.editLabelBtn')) {
+            updateNoteLabelsSelect();
+        }
+    });
 
     function toggleNotePin(noteId) {
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
@@ -205,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });   
 
     function deleteNote(noteId) {
-        if (!confirm('Bạn muốn xóa note này?')) return;
+        if (!confirm('Are you sure you want to delete this note?')) return;
 
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
             method: 'POST',
@@ -230,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         .catch(error => {
-            console.error('Lỗi kết nối:', error);
+            console.error('Connection error:', error);
         });
     }
 
@@ -245,13 +436,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('noteContent').value = data.note.content;
                 document.getElementById('noteFormBtn').textContent = 'Update Note';
                 document.getElementById('noteFormHeader').textContent = 'Edit Note';
+                fetchLabelsAndUpdateSelect();
+                setSelectedLabels(data.note.labels ? data.note.labels.map(Number) : []);
                 document.getElementById("noteForm").setAttribute("data-id", noteId);
             } else {
                 alert('Error fetching note: ' + data.message);
             }
         })
         .catch(error => {
-            console.error('Lỗi kết nối:', error);
+            console.error('Connection error:', error);
         });
     }
 
@@ -262,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Title is required.');
             return;
         }
+        const selectedLabels = Array.from(noteLabelsSelect.selectedOptions).map(opt => opt.value);
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
             method: 'POST',
             headers: {
@@ -271,6 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 id: noteId,
                 title,
                 content,
+                labels: selectedLabels.join(','),
                 action: 'autosave'
             })
         })
@@ -286,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         .catch(error => {
-            console.error('Lỗi kết nối:', error);
+            console.error('Connection error:', error);
         });
     }
 
