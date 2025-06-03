@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
     <style>
         body {
@@ -156,51 +157,27 @@
     </div>
 
     <!-- pop up modal-->
-    
-    <!-- user information-->
-    <div id="popup-card" class="popup-container" style="display:none;">
-        <div class="popup-body bg-white p-4 rounded shadow" style="width: 380px">
-            <form id="userForm">
-                <div class="form-group">
-                    <div class="d-flex justify-content-center align-items-center">
-                        <label for="popupAvatarInput" style="margin-bottom:0;cursor:pointer;">
-                            <img id="popupUserInfo" src="/Note-Management-Web/Note-Web/images/personal.png" alt="User Icon" class="rounded-circle mr-2">
-                            <input type="file" id="popupAvatarInput" accept="image/*" style="display:none;">
-                        </label>
-                    </div>
+    <div id="popupModal" class="card shadow-lg border-0" style="display:none; position: fixed; top: 60px; left: 20px; width: 280px; z-index: 1050; border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-2">
+                <div class="ml-2">
+                    <div id="nameAccount" style="font-weight: bold; font-size: 1.1rem; color: #222;">Name</div>
+                    <div id="gmailAccount" style="font-size: 0.92rem; color: #6c757d;">gmail</div>
                 </div>
+            </div>
+            <hr class="my-2">
 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="lastNameUser">Last Name</label>
-                        <input name="lastname" type="text" class="form-control" id="lastNameUser" placeholder="Huynh" required readonly>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="firstNameUser">First Name</label>
-                        <input name="firstname" type="text" class="form-control" id="firstNameUser" placeholder="Kyle" required readonly> 
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="emailUser">Email</label>
-                    <input name="email" type="email" class="form-control" id="emailUser" placeholder="example@email.com" required readonly>
-                </div>
-
-                <div class="form-group">
-                    <label for="ageUser">Age</label>
-                    <input name="age" type="number" class="form-control" id="ageUser" placeholder="Age" min="1" max="100" required readonly>
-                </div>
-
-                <div class="form-group">
-                    <label for="phoneUser">Phone number</label>
-                    <input name="phone" type="tel" class="form-control" id="phoneUser" placeholder="0901234567" pattern="[0-9]{10,11}" required readonly>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <button style="width: 130px;" type="button" id="editBtn" class="btn btn-primary">Edit</button>
-                    <button style="width: 130px;" type="submit" id="saveBtn" class="btn btn-success">Save</button>
-                </div>
-            </form>
+            <div class="list-group list-group-flush">
+                <a href="accountInfo.html" class="list-group-item list-group-item-action border-0 d-flex align-items-center" style="border-radius: 8px;">
+                    <i class="fas fa-user mr-2 text-primary"></i> <span>Account info</span>
+                </a>
+                <a href="setting.html" class="list-group-item list-group-item-action border-0 d-flex align-items-center" style="border-radius: 8px;">
+                    <i class="fas fa-cog mr-2 text-success"></i> <span>Settings</span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action border-0 d-flex align-items-center" style="border-radius: 8px;">
+                    <i class="fas fa-bell mr-2 text-warning"></i> <span>Notifications</span>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -224,19 +201,85 @@
         </div>
     </div>
 
-    <!-- setting -->
-    <div id="settingsPageContainer" style="display:none;"></div>
-
     <script>
-       
+        document.addEventListener('DOMContentLoaded',()=>{
+            // active account
+            fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(localStorage.getItem('email'))}`)
+            .then(res => res.json())
+            .then(data => {
+                const msgBox = document.getElementById('activationMsg');
+                if (data.status === 'success' && !data.is_active) {
+                    const link = localStorage.getItem('activation_link');
+                    msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
+                    msgBox.style.display = 'block';
+                } 
+                else {
+                    msgBox.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi kiểm tra kích hoạt:', error);
+            });
 
-        // Sidebar active state toggle
+            // hien ten user
+            fetch('/Note-Management-Web/Note-Web/controllers/getUser.php', {
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const userName = document.getElementById('userName');
+                    userName.textContent = data.firstName + ' ' + data.lastName;
+
+                    const nameAccount = document.getElementById('nameAccount');
+                    nameAccount.textContent = data.firstName + ' ' + data.lastName;
+
+                    const gmailAccount = document.getElementById('gmailAccount');
+                    gmailAccount.textContent = data.email;
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi lấy user:', error);
+            });
+        })
+
+        // sidebar active state toggle
         document.querySelectorAll('.sidebar-link').forEach(link => {
             link.addEventListener('click', function() {
                 document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
             });
         });
+
+        // khi an logout remove localStorage
+        document.getElementById("logOut").addEventListener("click", function(e) {
+            e.preventDefault();
+
+            localStorage.removeItem("email");
+            localStorage.removeItem("is_activated");
+
+            const userName = document.getElementById("userName")
+
+            if (userName) {
+                userName.textContent = "Guest";
+            }
+
+            window.location.href = "login.html"; 
+        });
+
+        // open popup modal
+        document.getElementById('userInfo').addEventListener('click', function () {
+            document.getElementById('popupModal').style.display = 'block';
+        });
+
+        // close popup modal khi click ra ngoài
+        document.addEventListener('mousedown', function(event) {
+            const popup = document.getElementById('popupModal');
+            if (popup.style.display === 'block'&& !popup.contains(event.target) && event.target.id !== 'userInfo') {
+                popup.style.display = 'none';
+            }
+        });
+        
     </script>
 
     <script src="/Note-Management-Web/Note-Web/scripts.js"></script>
