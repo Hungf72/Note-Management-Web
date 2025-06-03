@@ -4,54 +4,185 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NotezyNeko - Change Password</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-    <div id="settingsPage" class="container mt-5">
-        <h3>Đổi mật khẩu</h3>
-        <form id="changePasswordForm" style="display: flex;">
-            
-            <div id="createPwd" class="form-group">
-                <label for="currentPassword"><i class="fas fa-lock"></i> Current Password</label>
-                <div class="input-group">
-                    <input name="currentPassword" type="password" class="form-control" id="currentPassword" placeholder="Đặt lại mật khẩu" required>
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="toggleCurrentPassword">
-                            <i class="fas fa-eye" id="toggleCurrentIcon"></i>
-                        </button>
+<body class="bg-light">
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-lg p-4" style="max-width: 420px; width: 100%; border-radius: 18px;">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Đổi mật khẩu</h3>
+                <form id="changePasswordForm">
+                    <div class="form-group mb-3">
+                        <label for="currentPassword"><i class="fas fa-lock"></i> Current Password</label>
+                        <div class="input-group">
+                            <input name="currentPassword" type="password" class="form-control" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleCurrentPassword">
+                                    <i class="fas fa-eye" id="toggleCurrentIcon"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    <div class="form-group mb-3">
+                        <label for="password"><i class="fas fa-lock"></i> New Password</label>
+                        <div class="input-group">
+                            <input name="password" type="password" class="form-control" id="password" placeholder="Đặt lại mật khẩu" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="confirmPassword"><i class="fas fa-lock"></i> Confirm Password</label>
+                        <div class="input-group">
+                            <input name="confirm_password" type="password" class="form-control" id="confirmPassword" placeholder="Nhập lại mật khẩu" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                    <i class="fas fa-eye" id="toggleConfirmIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block w-100">Đổi mật khẩu</button>
+                </form>
             </div>
 
-            <div id="createPwd" class="form-group">
-                <label for="password"><i class="fas fa-lock"></i> New Password</label>
-                <div class="input-group">
-                    <input name="password" type="password" class="form-control" id="password" placeholder="Đặt lại mật khẩu" required>
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                            <i class="fas fa-eye" id="toggleIcon"></i>
-                        </button>
+            <!-- message dialog -->
+            <div class="modal fade" id="message-dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header justify-content-center">
+                            <h4 class="modal-title text-center">Thông báo</h4>
+                        </div>
+        
+                        <div class="modal-body">
+                            <!-- hien thong bao o day -->
+                            <p id="modalMessage"></p>
+                        </div>
+                
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-info" data-dismiss="modal">Đóng</button>
+                        </div>            
                     </div>
                 </div>
             </div>
-
-            <div id="confirmPwd" class="form-group">
-                <label for="confirmPassword"><i class="fas fa-lock"></i> Confirm Password</label>
-                <div class="input-group">
-                    <input name="confirm_password" type="password" class="form-control" id="confirmPassword" placeholder="Nhập lại mật khẩu" required>
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
-                            <i class="fas fa-eye" id="toggleConfirmIcon"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
-
     <script>
+    // Toggle password visibility for all fields
+    document.getElementById('toggleCurrentPassword').onclick = function() {
+        const input = document.getElementById('currentPassword');
+        const icon = document.getElementById('toggleCurrentIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    document.getElementById('togglePassword').onclick = function() {
+        const input = document.getElementById('password');
+        const icon = document.getElementById('toggleIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    document.getElementById('toggleConfirmPassword').onclick = function() {
+        const input = document.getElementById('confirmPassword');
+        const icon = document.getElementById('toggleConfirmIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
 
+    document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const email = localStorage.getItem('email');
+
+        if (newPassword !== confirmPassword) {
+            alert('Mật khẩu mới và xác nhận không khớp!');
+            return;
+        }
+
+        // if (newPassword.length < 6) {
+        //     alert('Mật khẩu mới phải có ít nhất 6 ký tự!');
+        //     return;
+        // }
+   
+        if (currentPassword === newPassword) {
+            alert('Mật khẩu mới phải khác mật khẩu hiện tại!');
+            return;
+        }
+
+        fetch('/Note-Management-Web/Note-Web/controllers/checkpwd.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ 
+                currentPassword: currentPassword,
+                email: email 
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status !== 'success') {
+                alert(data.message);
+                return;
+            }
+
+            fetch('/Note-Management-Web/Note-Web/controllers/updatepwd.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    email: email, 
+                    password: newPassword
+                    
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1000);
+                } 
+                else {
+                    alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại!');
+                }
+            })
+            .catch(() => {
+                alert('Có lỗi xảy ra. Vui lòng thử lại!');
+            });
+        })
+        .catch(() => {
+            alert('Không thể xác thực mật khẩu hiện tại!');
+        });
+    });
     </script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
