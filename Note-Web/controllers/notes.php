@@ -17,6 +17,14 @@
             $stmt = $pdo->prepare("SELECT * FROM notes WHERE user_id = :user_id ORDER BY is_pinned ASC, CASE WHEN is_pinned = 1 THEN pinned_order END DESC, last_modified ASC");
             $stmt->execute(['user_id' => $userId]);
             $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Fetch labels for each note
+            foreach ($notes as &$note) {
+                $labelStmt = $pdo->prepare("SELECT label_id FROM note_labels WHERE note_id = :note_id");
+                $labelStmt->execute(['note_id' => $note['id']]);
+                $note['labels'] = array_map('intval', array_column($labelStmt->fetchAll(PDO::FETCH_ASSOC), 'label_id'));
+            }
+
             echo json_encode(['status' => 'success', 'notes' => $notes]);
         } catch (PDOException $e) {
             echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
@@ -30,6 +38,7 @@
             $title = trim($_POST['title'] ?? '');
             $content = trim($_POST['content'] ?? '');
             $userId = $_SESSION['user']['id'] ?? null;
+            $labels = !empty($_POST['labels']) ? explode(',', $_POST['labels']) : [];
 
             if (!$userId) {
                 echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để tạo note.']);
@@ -37,10 +46,26 @@
             }
 
             try {
+                $pdo->beginTransaction();
+
                 $stmt = $pdo->prepare("INSERT INTO notes (title, content, user_id) VALUES (:title, :content, :user_id)");
                 $stmt->execute(['title' => $title, 'content' => $content, 'user_id' => $userId]);
+                $noteId = $pdo->lastInsertId();
+
+                // Save label associations
+                if (!empty($labels)) {
+                    $labelStmt = $pdo->prepare("INSERT INTO note_labels (note_id, label_id) VALUES (:note_id, :label_id)");
+                    foreach ($labels as $labelId) {
+                        if ($labelId !== '') {
+                            $labelStmt->execute(['note_id' => $noteId, 'label_id' => $labelId]);
+                        }
+                    }
+                }
+
+                $pdo->commit();
                 echo json_encode(['status' => 'success', 'message' => 'Note đã được tạo thành công.']);
             } catch (PDOException $e) {
+                $pdo->rollBack();
                 echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
             }
             exit;
@@ -64,8 +89,14 @@
             }
 
             try {
+                // First delete the note-label associations
+                $stmt = $pdo->prepare("DELETE FROM note_labels WHERE note_id = :note_id");
+                $stmt->execute(['note_id' => $noteId]);
+
+                // Then delete the note
                 $stmt = $pdo->prepare("DELETE FROM notes WHERE id = :id AND user_id = :user_id");
                 $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
+
                 echo json_encode(['status' => 'success', 'message' => 'Note đã được xóa thành công.']);
             } catch (PDOException $e) {
                 echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
@@ -93,6 +124,10 @@
             $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
             $note = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($note) {
+                // Fetch label associations
+                $labelStmt = $pdo->prepare("SELECT label_id FROM note_labels WHERE note_id = :note_id");
+                $labelStmt->execute(['note_id' => $noteId]);
+                $note['labels'] = array_map('intval', array_column($labelStmt->fetchAll(PDO::FETCH_ASSOC), 'label_id'));
                 echo json_encode(['status' => 'success', 'note' => $note]);
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy note.']);
@@ -109,6 +144,7 @@
         $title = trim($_POST['title'] ?? '');
         $content = trim($_POST['content'] ?? '');
         $userId = $_SESSION['user']['id'] ?? null;
+        $labels = !empty($_POST['labels']) ? explode(',', $_POST['labels']) : [];
 
         if (!$userId) {
             echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để tự động lưu note.']);
@@ -123,6 +159,21 @@
         try{
             $stmt = $pdo->prepare(("UPDATE notes SET title = :title, content = :content WHERE id = :id AND user_id = :user_id"));
             $stmt->execute((['title' => $title, 'content' => $content, 'id' => $noteIT, 'user_id' => $userId]));
+
+            // Remove old label associations
+            $delStmt = $pdo->prepare("DELETE FROM note_labels WHERE note_id = :note_id");
+            $delStmt->execute(['note_id' => $noteIT]);
+
+            // Add new label associations
+            if (!empty($labels)) {
+                $labelStmt = $pdo->prepare("INSERT INTO note_labels (note_id, label_id) VALUES (:note_id, :label_id)");
+                foreach ($labels as $labelId) {
+                    if ($labelId !== '') {
+                        $labelStmt->execute(['note_id' => $noteIT, 'label_id' => $labelId]);
+                    }
+                }
+            }
+
             echo json_encode(['status' => 'success', 'message' => 'Note đã được tự động lưu thành công.']);
         } catch (PDOException $e) {
             echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
