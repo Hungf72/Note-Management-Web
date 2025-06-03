@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         .catch(error => {
-            console.error('Lỗi kết nối:', error);
+            console.error('Connection error:', error);
         });
     }
 
@@ -252,12 +252,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 fetchLabelsAndUpdateSelect(); // Ensure labels are updated
                 displayNotes(data.notes);
             } else {
-                console.error('Lỗi khi lấy notes:', data.message);
-                console.log('Dữ liệu trả về:', data);
+                console.error('Note fetching error:', data.message);
             }
         })
         .catch(error => {
-            console.error('Lỗi kết nối:', error);
+            console.error('Connection error:', error);
         });
     }
 
@@ -318,8 +317,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Show labels as badges
             let labelBadges = '';
             if (note.labels && note.labels.length) {
-                labelBadges = note.labels.map(lid => {
-                    const label = allLabels.find(l => l.id == lid);
+                labelBadges = note.labels.map(labelid => {
+                    const label = allLabels.find(label => label.id == labelid);
                     return label ? `<span class='badge badge-info mr-1'>${label.name}</span>` : '';
                 }).join('');
             }
@@ -344,11 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addLabelBtn.addEventListener('click', updateNoteLabelsSelect);
     saveNewLabelBtn.addEventListener('click', fetchLabelsAndUpdateSelect);
-    labelsList.addEventListener('click', function(e) {
-        if (e.target.closest('.deleteLabelBtn') || e.target.closest('.editLabelBtn')) {
-            updateNoteLabelsSelect();
-        }
-    });
 
     function toggleNotePin(noteId) {
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
