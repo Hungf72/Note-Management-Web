@@ -89,8 +89,14 @@
             }
 
             try {
+                // First delete the note-label associations
+                $stmt = $pdo->prepare("DELETE FROM note_labels WHERE note_id = :note_id");
+                $stmt->execute(['note_id' => $noteId]);
+
+                // Then delete the note
                 $stmt = $pdo->prepare("DELETE FROM notes WHERE id = :id AND user_id = :user_id");
                 $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
+
                 echo json_encode(['status' => 'success', 'message' => 'Note đã được xóa thành công.']);
             } catch (PDOException $e) {
                 echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
@@ -151,8 +157,6 @@
         }
 
         try{
-            $pdo->beginTransaction();
-
             $stmt = $pdo->prepare(("UPDATE notes SET title = :title, content = :content WHERE id = :id AND user_id = :user_id"));
             $stmt->execute((['title' => $title, 'content' => $content, 'id' => $noteIT, 'user_id' => $userId]));
 
@@ -170,10 +174,8 @@
                 }
             }
 
-            $pdo->commit();
             echo json_encode(['status' => 'success', 'message' => 'Note đã được tự động lưu thành công.']);
         } catch (PDOException $e) {
-            $pdo->rollBack();
             echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
         }
     }
