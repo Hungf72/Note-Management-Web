@@ -1,6 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetchNotes();
+    let allLabels = [];
+    let currentLabelFilter = [];
+    let isEditingLabels = false;
+    let allNotes = []; // Store all notes for searching
+    
+    document.getElementById('searchNotes').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        let filteredNotes;
 
+        if (!allNotes.length) return;
+
+        if (searchTerm) {
+            filteredNotes = allNotes.filter(note =>note.title.toLowerCase().includes(searchTerm) || note.content.toLowerCase().includes(searchTerm)
+            );
+        } else {
+            filteredNotes = allNotes;
+        }
+
+        displayNotes(filteredNotes);
+    });
+    
     const email = localStorage.getItem("email");
     alert(email);
     if (!email) {
@@ -8,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = "login.html";
         }, 1000);
     }
+
+    fetchNotes();
+    //fetchLabels();
 
     document.getElementById("noteForm").addEventListener("submit", function (e) {
         e.preventDefault();
@@ -26,6 +48,26 @@ document.addEventListener('DOMContentLoaded', () => {
             createNote(title, content);
         }
     });
+
+    function fetchLabels() {
+        fetch('/Note-Management-Web/Note-Web/controllers/labels.php', {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                allLabels = data.labels;
+                // displayLabels(allLabels);
+            }
+            else {
+                console.error('Error fetching labels:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Connection error:', error);
+        });
+    }
+
 
     function createNote(title, content) {
         if (!title) {
@@ -59,22 +101,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function fetchNotes() {
-    fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
-        method: 'GET' 
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            displayNotes(data.notes);
-        } else {
-            console.error('Lỗi khi lấy notes:', data.message);
-            console.log('Dữ liệu trả về:', data);
-        }
-    })
-    .catch(error => {
-        console.error('Lỗi kết nối:', error);
-    });
-}
+        fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+            method: 'GET' 
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                allNotes = data.notes; // Store all notes for searching
+                displayNotes(data.notes);
+            } else {
+                console.error('Lỗi khi lấy notes:', data.message);
+                console.log('Dữ liệu trả về:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi kết nối:', error);
+        });
+    }
 
     function displayNotes(notes) {
         const notesList = document.getElementById('notesList');
@@ -85,11 +128,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        notes.forEach(note => {
-            const pinIconClass = note.is_pinned == 1 ? 'bi bi-pin-angle' : 'bi bi-pin-angle-fill';
-                    
+        // Sort notes: pinned first, then by last modified date
+        const sortedNotes = [...notes].sort((a, b) => {
+            if (a.is_pinned !== b.is_pinned) {
+                return b.is_pinned - a.is_pinned; // Pinned notes first
+            }
+            // For notes with same pin status, sort by last modified date
+            return new Date(b.last_modified) - new Date(a.last_modified);
+        });
+
+        sortedNotes.forEach(note => {
+            const pinIconClass = note.is_pinned == 1 ? 'bi bi-pin-angle-fill' : 'bi bi-pin-angle';
             const noteCard = document.createElement('div');
-            noteCard.className = `card note-card mb-3 ${(note.is_pinned == 1) ? 'pinned-note' : ''}`;         
+            noteCard.className = `card note-card mb-3 ${note.is_pinned == 1 ? 'pinned-note' : ''}`;
             noteCard.innerHTML = `
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
