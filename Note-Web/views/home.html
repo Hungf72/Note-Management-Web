@@ -250,6 +250,11 @@
     </div>
 
     <script>
+        const email = localStorage.getItem("email");
+        if (!email) {
+            window.location.href = "login.html";
+        }
+
         document.addEventListener('DOMContentLoaded',()=>{
             // active account
             fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(localStorage.getItem('email'))}`)
