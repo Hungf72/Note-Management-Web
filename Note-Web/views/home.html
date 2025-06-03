@@ -139,6 +139,10 @@
                         <label for="noteContent">Content</label>
                         <textarea class="form-control" id="noteContent" rows="3" required></textarea>
                     </div>
+                    <div class="form-group">
+                        <label for="noteLabels">Labels</label>
+                        <select class="form-control" id="noteLabels" multiple></select>
+                    </div>
                     <button type="submit" class="btn btn-primary" id="noteFormBtn">Create Note</button>
                 </form>
             </div>
@@ -150,6 +154,23 @@
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                 </div>
                 <input type="text" id="searchNotes" class="form-control" placeholder="Search notes by title or content...">
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Labels</h5>
+                <button class="btn btn-sm btn-success" id="addLabelBtn"><i class="fas fa-plus"></i> Add Label</button>
+            </div>
+            <div class="card-body">
+                <ul class="list-group" id="labelsList"></ul>
+                <div class="input-group mt-3" id="addLabelInputGroup" style="display:none;">
+                    <input type="text" class="form-control" id="newLabelName" placeholder="Label name">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" id="saveNewLabelBtn">Save</button>
+                        <button class="btn btn-secondary" id="cancelNewLabelBtn">Cancel</button>
+                    </div>
+                </div>
             </div>
         </div>
 
