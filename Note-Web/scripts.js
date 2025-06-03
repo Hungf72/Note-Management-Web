@@ -322,52 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Lỗi khi lấy user:', error);
     });
 
-    // active account
-    fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(localStorage.getItem('email'))}`)
-    .then(res => res.json())
-    .then(data => {
-        const msgBox = document.getElementById('activationMsg');
-        if (data.status === 'success' && !data.is_active) {
-            const link = localStorage.getItem('activation_link');
-            msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
-            msgBox.style.display = 'block';
-        } 
-        else {
-            msgBox.style.display = 'none';
-        }
-    })
-    .catch(error => {
-        console.error('Lỗi khi kiểm tra kích hoạt:', error);
-    });
-
-});
-
-// khi an logout remove localStorage
-document.getElementById("logOut").addEventListener("click", function(e) {
-    e.preventDefault();
-
-    localStorage.removeItem("email");
-    localStorage.removeItem("is_activated");
-
-    const userName = document.getElementById("userName")
-
-    if (userName) {
-        userName.textContent = "Guest";
-    }
-
-    window.location.href = "login.html"; 
-});
-
-//close pop up
-document.getElementById('popup-card').addEventListener('click', (e) => {
-    if (e.target.id === 'popup-card') {
-        e.target.style.display = 'none';
-
-        document.getElementById('firstNameUser').readOnly = true;
-        document.getElementById('lastNameUser').readOnly = true;
-        document.getElementById('ageUser').readOnly = true;
-        document.getElementById('phoneUser').readOnly = true;
-    }
 });
 
 // show information
@@ -479,74 +433,28 @@ document.getElementById('popupAvatarInput').addEventListener('change', function(
     reader.readAsDataURL(file);
 });
 
-// Xử lý submit form đổi mật khẩu
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('changePasswordForm');
-    if (form) {
-        form.onsubmit = function(e) {
-            e.preventDefault();
-            const currentPassword = document.getElementById('currentPassword').value.trim();
-            const newPassword = document.getElementById('newPassword').value.trim();
-            const confirmPassword = document.getElementById('confirmPassword').value.trim();
-            const msgBox = document.getElementById('changePwdMsg');
-            msgBox.textContent = '';
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                msgBox.textContent = 'Vui lòng nhập đầy đủ thông tin.';
-                msgBox.style.color = 'red';
-                return;
-            }
-            if (newPassword !== confirmPassword) {
-                msgBox.textContent = 'Mật khẩu mới không khớp.';
-                msgBox.style.color = 'red';
-                return;
-            }
-            fetch('/Note-Management-Web/Note-Web/controllers/updatepwd.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    currentPassword,
-                    newPassword,
-                    action: 'changePassword',
-                    email: localStorage.getItem('email')
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                msgBox.textContent = data.message;
-                msgBox.style.color = data.status === 'success' ? 'green' : 'red';
-                if (data.status === 'success') {
-                    form.reset();
-                }
-            })
-            .catch(() => {
-                msgBox.textContent = 'Có lỗi xảy ra, vui lòng thử lại.';
-                msgBox.style.color = 'red';
-            });
-        };
-    }
-});
 
-document.getElementById("toggleCurrentPassword").addEventListener("click", function () {
-    const pwd = document.getElementById("currentPassword");
-    const icon = document.getElementById("toggleCurrentIcon");
-    pwd.type = pwd.type === "password" ? "text" : "password";
-    icon.classList.toggle("fa-eye");
-    icon.classList.toggle("fa-eye-slash");
-});
+// document.getElementById("toggleCurrentPassword").addEventListener("click", function () {
+//     const pwd = document.getElementById("currentPassword");
+//     const icon = document.getElementById("toggleCurrentIcon");
+//     pwd.type = pwd.type === "password" ? "text" : "password";
+//     icon.classList.toggle("fa-eye");
+//     icon.classList.toggle("fa-eye-slash");
+// });
 
-document.getElementById("togglePassword").addEventListener("click", function () {
-    const pwd = document.getElementById("password");
-    const icon = document.getElementById("toggleIcon");
-    pwd.type = pwd.type === "password" ? "text" : "password";
-    icon.classList.toggle("fa-eye");
-    icon.classList.toggle("fa-eye-slash");
-});
+// document.getElementById("togglePassword").addEventListener("click", function () {
+//     const pwd = document.getElementById("password");
+//     const icon = document.getElementById("toggleIcon");
+//     pwd.type = pwd.type === "password" ? "text" : "password";
+//     icon.classList.toggle("fa-eye");
+//     icon.classList.toggle("fa-eye-slash");
+// });
 
-document.getElementById("toggleConfirmPassword").addEventListener("click", function () {
-    const pwd = document.getElementById("confirmPassword");
-    const icon = document.getElementById("toggleConfirmIcon");
-    pwd.type = pwd.type === "password" ? "text" : "password";
-    icon.classList.toggle("fa-eye");
-    icon.classList.toggle("fa-eye-slash");
-});
+// document.getElementById("toggleConfirmPassword").addEventListener("click", function () {
+//     const pwd = document.getElementById("confirmPassword");
+//     const icon = document.getElementById("toggleConfirmIcon");
+//     pwd.type = pwd.type === "password" ? "text" : "password";
+//     icon.classList.toggle("fa-eye");
+//     icon.classList.toggle("fa-eye-slash");
+// });
 
