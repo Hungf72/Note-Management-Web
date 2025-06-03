@@ -1,0 +1,77 @@
+/* Add minimal dark/light mode CSS */
+.dark-mode {
+    background: #23272b !important;
+    color: #f8f9fa !important;
+}
+.dark-mode .card,
+.dark-mode .bg-white {
+    background: #23272b !important;
+    color: #f8f9fa !important;
+    border-color: #444 !important;
+}
+.dark-mode .sidebar {
+    background: #181a1b !important;
+    color: #fff !important;
+}
+.dark-mode .form-control,
+.dark-mode .input-group-text {
+    background: #23272b !important;
+    color: #f8f9fa !important;
+    border-color: #444 !important;
+}
+.light-mode {
+    background: #fff !important;
+    color: #23272b !important;
+}
+.dark-mode #nameAccount, .dark-mode .popup-user-name {
+    color: #f8f9fa !important;
+}
+.dark-mode #gmailAccount, .dark-mode .popup-user-email {
+    color: #b0b8c1 !important;
+}
+
+/* Dark mode for user info popup list-group */
+.dark-mode #popupModal,
+.dark-mode .list-group-item {
+    background-color: black !important;
+    color: #f8f9fa !important;
+    border-color: black !important;
+}
+.dark-mode .list-group-item:hover, 
+.dark-mode .list-group-item:focus, 
+.dark-mode .list-group-item.active {
+    background-color: #2c3136 !important;
+    color: #fff !important;
+}
+.dark-mode .list-group-item .text-primary {
+    color: #4da3ff !important;
+}
+.dark-mode .list-group-item .text-success {
+    color: #6edc8c !important;
+}
+.dark-mode .list-group-item .text-warning {
+    color: #ffd966 !important;
+}
+
+/* Dark mode for settings popup sidebar */
+.dark-mode #settingsPopup .border-end.bg-light {
+    background-color: #181a1b !important;
+    border-color: #444 !important;
+}
+.dark-mode .settings-nav .nav-link {
+    color: #f8f9fa !important;
+}
+.dark-mode .settings-nav .nav-link.active, 
+.dark-mode .settings-nav .nav-link:hover {
+    background: #23272b !important;
+    color: #4da3ff !important;
+}
+.dark-mode .settings-nav .nav-link.text-warning {
+    color: #ffd966 !important;
+}
+.dark-mode .settings-nav .nav-link .fa-star {
+    color: #ffd966 !important;
+}
+.dark-mode #settingsPopup h6.text-muted {
+    color: #b0b8c1 !important;
+}
