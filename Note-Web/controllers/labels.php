@@ -96,8 +96,14 @@
             }
 
             try {
+                // First delete all note-label associations for this label
+                $stmt = $pdo->prepare("DELETE FROM note_labels WHERE label_id = :label_id");
+                $stmt->execute(['label_id' => $labelId]);
+
+                // Then delete the label itself
                 $stmt = $pdo->prepare("DELETE FROM labels WHERE id = :id AND user_id = :user_id");
                 $stmt->execute(['id' => $labelId, 'user_id' => $userId]);
+
                 echo json_encode(['status' => 'success', 'message' => 'Label deleted successfully.']);
             } catch (PDOException $e) {
                 echo json_encode(['status' => 'error', 'message' => 'System error: ' . $e->getMessage()]);
