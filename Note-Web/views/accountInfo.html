@@ -49,5 +49,112 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+           fetch('/Note-Management-Web/Note-Web/controllers/getUser.php', {
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('lastNameUser').value = data.lastName;
+                    document.getElementById('firstNameUser').value = data.firstName;
+                    document.getElementById('emailUser').value = data.email;
+                    document.getElementById('ageUser').value = data.age;
+                    document.getElementById('phoneUser').value = data.phone;
+                    // Set avatar for card
+                    let avatarUrl = data.avatar;
+                    if (avatarUrl) {
+                        avatarUrl ='/Note-Management-Web/Note-Web/' + avatarUrl.replace(/\\/g, '/');
+                    } 
+                    else {
+                        avatarUrl = '/Note-Management-Web/Note-Web/images/personal.png';
+                    }
+                    document.getElementById('popupUserInfo').src = avatarUrl;
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi lấy user:', error);
+            });
+        });
+
+        // edit
+        document.getElementById('editBtn').addEventListener('click', () =>{
+            ['firstNameUser', 'lastNameUser', 'ageUser', 'phoneUser'].forEach(id => {
+                document.getElementById(id).readOnly = false;
+            });
+        });
+
+        // update information
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const popupAvatar = document.getElementById('popupUserInfo');
+            const popupAvatarInput = document.getElementById('popupAvatarInput');
+            if (popupAvatarInput.files && popupAvatarInput.files[0]) {
+                formData.append('avatar', popupAvatarInput.files[0]);
+            }
+            fetch('/Note-Management-Web/Note-Web/controllers/updateUser.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Hiển thị thông báo nếu muốn
+                if (data.status === "success") {
+                    fetch('/Note-Management-Web/Note-Web/controllers/getUser.php', {
+                        credentials: 'include'
+                    })
+                    .then(res => res.json())
+                    .then(user => {
+                        if (user.status === 'success') {
+                            document.getElementById('emailUser').value = user.email;
+                            document.getElementById('firstNameUser').value = user.firstName;
+                            document.getElementById('lastNameUser').value = user.lastName;
+                            document.getElementById('ageUser').value = user.age;
+                            document.getElementById('phoneUser').value = user.phone;
+
+                            // Update avatar after save
+                            let avatarUrl = user.avatar;
+                            if (avatarUrl) {
+                                avatarUrl = '/Note-Management-Web/Note-Web/' + avatarUrl;
+                            } 
+                            else {
+                                avatarUrl = '/Note-Management-Web/Note-Web/images/personal.png';
+                            }
+                            document.getElementById('popupUserInfo').src = avatarUrl;
+                        }
+            
+                        ['firstNameUser', 'lastNameUser', 'ageUser', 'phoneUser'].forEach(id => {
+                            document.getElementById(id).readOnly = true;
+                        });
+
+                        window.location.href = "home.html";
+                    });
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi khi cập nhật:', err);
+            });
+        });
+
+        // avatar change
+        document.getElementById('popupAvatarInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('popupUserInfo').src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
 </body>
 </html>
