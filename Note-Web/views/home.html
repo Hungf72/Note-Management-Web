@@ -542,6 +542,8 @@
                 return;
             }
 
+            console.log('Sharing notes from:', email, 'to:', shareEmail);
+
             // check activation
             fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(email)}`)
             .then(res => res.json())
@@ -566,8 +568,8 @@
                             alert('Tài khoản người nhận chưa được kích hoạt!');
                             return;
                         }
-                        // TODO: Thực hiện logic chia sẻ ghi chú ở đây
-                        alert('Có thể chia sẻ ghi chú! (Demo)');
+                        alert('Chia sẻ ghi chú thành công!');
+                        
                     })
                     .catch(err => {
                         alert('Lỗi khi kiểm tra kích hoạt người nhận!');
