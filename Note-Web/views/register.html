@@ -166,11 +166,11 @@
 
         // Validate đơn giản
         if (!lastName || !firstName || !age || !phone || !email || !password || !confirmPassword) {
-          showModal('Vui lòng nhập đầy đủ thông tin!');
+          showModal('Please enter complete information!');
           return;
         }
         if (password !== confirmPassword) {
-          showModal('Mật khẩu xác nhận không khớp!');
+          showModal('Confirmation password does not match!');
           return;
         }
 
@@ -200,7 +200,7 @@
         })
         .catch(error => {
             console.error(error);
-            showModal("Đã xảy ra lỗi!");
+            showModal("Something went wrong!!!");
         });
     });
 

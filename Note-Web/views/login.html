@@ -186,8 +186,8 @@
                 }
             })
             .catch(error => {
-              console.error("Lỗi:", error);
-              document.getElementById("modalMessage").textContent = "Đã xảy ra lỗi!";
+              console.error(error);
+              document.getElementById("modalMessage").textContent = "Something went wrong!!!";
               document.getElementById('modal').classList.remove('hidden');
             });
         });
