@@ -7,11 +7,10 @@ require_once __DIR__ . '/../models/connect.php';
 // Nếu có email truyền vào, kiểm tra user theo email
 if (isset($_GET['email'])) {
     $email = $_GET['email'];
-    $stmt = $conn->prepare('SELECT email, firstName, lastName, age, phone, avatar FROM users WHERE email = ? LIMIT 1');
-    $stmt->bind_param('s', $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
+    $stmt = $pdo->prepare('SELECT email, firstName, lastName, age, phone, avatar FROM users WHERE email = :email LIMIT 1');
+    $stmt->execute(['email' => $email]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
         echo json_encode([
             'status' => 'success',
             'email' => $row['email'],
