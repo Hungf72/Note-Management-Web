@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sidebarHome = document.getElementById('sidebarHome');
     const sidebarNotes = document.getElementById('sidebarNotes');
-    const homeContent = document.querySelector('.container.mt-5');
+    const homeContent = document.querySelector('.Home-Content');
     const noteContent = document.querySelector('.Note-Content');
 
     homeContent.style.display = 'block';
