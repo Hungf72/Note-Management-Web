@@ -462,6 +462,33 @@
                 avatar.src = url || '/Note-Management-Web/Note-Web/images/personal.png';
             }
         }
+
+        // get note to select
+        document.getElementById('sidebarSharing').addEventListener('click', ()=>{
+            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then(data => {
+                const select = document.getElementById('shareNotes');
+                select.innerHTML = '';
+                
+                if (data.status === 'success' && Array.isArray(data.notes)) {
+                    data.notes.forEach(note => {
+                        const option = document.createElement('option');
+                        option.value = note.id;
+                        option.textContent = note.title;
+                        select.appendChild(option);
+                    });
+                } 
+                else {
+                    const option = document.createElement('option');
+                    option.disabled = true;
+                    option.textContent = 'No notes found';
+                    select.appendChild(option);
+                }
+            });
+        });
     </script>
 
     <script src="/Note-Management-Web/Note-Web/scripts.js"></script>
