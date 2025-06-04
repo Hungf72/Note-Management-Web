@@ -47,7 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':password'  => $hashed_password,
         ]);
         
+        $userId = $pdo->lastInsertId();
         $_SESSION['user'] = [
+            'id' => $userId, 
             'email' => $email,
             'firstName' => $firstName,
             'lastName' => $lastName,
