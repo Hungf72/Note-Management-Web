@@ -2,6 +2,43 @@ document.addEventListener('DOMContentLoaded', () => {
     let allLabels = [];
     let allNotes = []; // Store all notes for searching
     let isEditingLabels = false;
+
+    const sidebarHome = document.getElementById('sidebarHome');
+    const sidebarNotes = document.getElementById('sidebarNotes');
+    const homeContent = document.querySelector('.container.mt-5');
+    const noteContent = document.querySelector('.Note-Content');
+
+    homeContent.style.display = 'block';
+    noteContent.style.display = 'none';
+
+    sidebarHome.addEventListener('click', (e) => {
+        e.preventDefault();
+        homeContent.style.display = 'block';
+        noteContent.style.display = 'none';
+        
+        sidebarNotes.classList.remove('active');
+        sidebarHome.classList.add('active');
+    });
+
+    sidebarNotes.addEventListener('click', (e) => {
+        e.preventDefault();
+        homeContent.style.display = 'none';
+        noteContent.style.display = 'block';
+        
+        sidebarHome.classList.remove('active');
+        sidebarNotes.classList.add('active');
+
+        fetchNotes(); 
+        fetchLabelsAndUpdateSelect(); 
+    });
+    
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', function() {
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
     
     document.getElementById('searchNotes').addEventListener('input', function(e) {
         const searchTerm = e.target.value.toLowerCase();
@@ -43,12 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+
     const labelsList = document.getElementById('labelsList');
     const addLabelBtn = document.getElementById('addLabelBtn');
     const addLabelInputGroup = document.getElementById('addLabelInputGroup');
     const newLabelName = document.getElementById('newLabelName');
     const saveNewLabelBtn = document.getElementById('saveNewLabelBtn');
     const cancelNewLabelBtn = document.getElementById('cancelNewLabelBtn');
+    const noteUI = document.getElementById('Note-Content');
 
     function displayLabels(labels) {
         labelsList.innerHTML = '';
@@ -79,6 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelNewLabelBtn.addEventListener('click', () => {
         addLabelInputGroup.style.display = 'none';
         newLabelName.value = '';
+    });
+
+    document.getElementById('sidebarNotes').addEventListener('click', function(e) {
+        noteUI.style.display = 'flex';
     });
 
     saveNewLabelBtn.addEventListener('click', () => {
