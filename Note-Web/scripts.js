@@ -514,39 +514,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Connection error:', error);
         });
     }
-
-    fetch('/Note-Management-Web/Note-Web/controllers/getUser.php', {
-        credentials: 'include'
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'success') {
-            const userName = document.getElementById('userName');
-            userName.textContent = data.firstName + ' ' + data.lastName;
-            // Set avatar for sidebar and popup
-            let avatarUrl = data.avatar;
-            if (avatarUrl) {
-                if (!avatarUrl.startsWith('/')) avatarUrl = '/' + avatarUrl;
-                avatarUrl = avatarUrl.replace(/\\/g, '/');
-                if (!avatarUrl.startsWith('/Note-Management-Web/Note-Web/images/avatars/')) {
-                    avatarUrl = '/Note-Management-Web/Note-Web/' + avatarUrl.replace(/^\/*/, '');
-                }
-            } else {
-                avatarUrl = '/Note-Management-Web/Note-Web/images/personal.png';
-            }
-            document.getElementById('userInfo').src = avatarUrl;
-            document.getElementById('popupUserInfo').src = avatarUrl;
-        } else {
-            const userName = document.getElementById('userName');
-            userName.textContent = 'Guest';
-            document.getElementById('userInfo').src = '/Note-Management-Web/Note-Web/images/personal.png';
-            document.getElementById('popupUserInfo').src = '/Note-Management-Web/Note-Web/images/personal.png';
-        }
-    })
-    .catch(error => {
-        console.error('Lỗi khi lấy user:', error);
-    });
-
 });
 
 
