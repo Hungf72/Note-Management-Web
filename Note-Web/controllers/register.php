@@ -47,14 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':password'  => $hashed_password,
         ]);
         
+        $userId = $pdo->lastInsertId();
         $_SESSION['user'] = [
+            'id' => $userId, 
             'email' => $email,
             'firstName' => $firstName,
             'lastName' => $lastName,
             'age' => $age,
             'phone' => $phone
         ];
-
+        
         // Gửi email kích hoạt
         $activation_link = "http://localhost/Note-Management-Web/Note-Web/views/activate.html?email=" . urlencode($email);
 
