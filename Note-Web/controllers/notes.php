@@ -43,11 +43,37 @@
             if (!$userId) {
                 echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để tạo note.']);
                 exit;
+            }      
+                  
+            $imagePath = null;
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../uploads/';
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                
+                $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+                
+                if (!in_array($ext, $allowedTypes)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Only JPG, JPEG, PNG & GIF files are allowed.']);
+                    exit;
+                }
+                
+                $filename = 'note_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $filename)) {
+                    $imagePath = 'uploads/' . $filename;
+                }
             }
 
             try {
-                $stmt = $pdo->prepare("INSERT INTO notes (title, content, user_id) VALUES (:title, :content, :user_id)");
-                $stmt->execute(['title' => $title, 'content' => $content, 'user_id' => $userId]);
+                $stmt = $pdo->prepare("INSERT INTO notes (title, content, user_id, image_path) VALUES (:title, :content, :user_id, :image_path)");
+                $stmt->execute([
+                    'title' => $title,
+                    'content' => $content,
+                    'user_id' => $userId,
+                    'image_path' => $imagePath
+                ]);
                 $noteId = $pdo->lastInsertId();
 
                 // Save label associations
