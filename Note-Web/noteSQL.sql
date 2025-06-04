@@ -19,6 +19,7 @@ create table notes (
     title varchar(255) not null,
     content text not null,
     label varchar(255) default null,
+    image_path varchar(255) default null,
     created_at timestamp default CURRENT_TIMESTAMP,
     last_modified timestamp default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
     note_password varchar(255) not null,
