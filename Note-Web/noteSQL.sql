@@ -22,6 +22,8 @@ create table notes (
     created_at timestamp default CURRENT_TIMESTAMP,
     last_modified timestamp default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
     note_password varchar(255) not null,
+    is_share TINYINT(1) NOT NULL DEFAULT 0,
+
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
