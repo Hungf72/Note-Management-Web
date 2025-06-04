@@ -46,8 +46,6 @@
             }
 
             try {
-                $pdo->beginTransaction();
-
                 $stmt = $pdo->prepare("INSERT INTO notes (title, content, user_id) VALUES (:title, :content, :user_id)");
                 $stmt->execute(['title' => $title, 'content' => $content, 'user_id' => $userId]);
                 $noteId = $pdo->lastInsertId();
@@ -62,7 +60,6 @@
                     }
                 }
 
-                $pdo->commit();
                 echo json_encode(['status' => 'success', 'message' => 'Note đã được tạo thành công.']);
             } catch (PDOException $e) {
                 $pdo->rollBack();
