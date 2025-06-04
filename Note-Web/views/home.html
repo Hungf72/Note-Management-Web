@@ -105,13 +105,13 @@
             <h5 class="mb-0"><span id="userName">Guest</span></h5>
         </div>
 
-        <a href="home.html" class="sidebar-link active" id="sidebarHome"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="sidebar-link active" id="sidebarHome"><i class="fas fa-home"></i> Home</a>
         <a href="#" class="sidebar-link" id="sidebarNotes"><i class="fas fa-sticky-note"></i> Notes</a>
-        <a href="#" class="sidebar-link" id="sidebarSettings"><i class="fas fa-user-friends"></i> Sharing</a>
+        <a href="#" class="sidebar-link" id="sidebarSharing"><i class="fas fa-user-friends"></i> Sharing</a>
         <a href="login.html" class="sidebar-link" id="logOut"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
-    <!-- main content -->
+    <!-- home -->
     <div class="Home-Content container mt-5">
         <!-- message activation -->
         <div class="alert alert-info mt-3" id="activationMsg" style="display: none;"></div>
@@ -119,7 +119,7 @@
         <p>This is the home page where you can manage your notes.</p>
     </div>
 
-
+    <!-- notes -->
     <div class="Note-Content container mt-4 main-content" style="display: none;">
         <div class="card mb-4">
             <div class="card-header">
@@ -171,6 +171,26 @@
         </div>
 
         <div id="notesList"></div>
+    </div>
+
+    <!-- sharing note -->
+    <div class="sharing-Content container mt-5" style="display: none;">
+        <div class="card shadow p-4" style="max-width: 500px; margin: 0 auto;">
+            <h4 class="mb-3">Share Notes</h4>
+            <form id="shareNoteForm">
+                <div class="form-group mb-3">
+                    <label for="shareEmail">Recipient Email</label>
+                    <input type="email" class="form-control" id="shareEmail" placeholder="Enter recipient's email" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="shareNotes">Select Notes to Share</label>
+                    <select multiple class="form-control" id="shareNotes" required>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Share</button>
+            </form>
+        </div>
     </div>
 
     <!-- pop up userinfo modal-->
@@ -251,6 +271,8 @@
         </div>
     </div>
 
+    
+
     <script>
         const email = localStorage.getItem("email");
         if (!email) {
@@ -314,6 +336,22 @@
             link.addEventListener('click', function() {
                 document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
+
+                // Show/hide content based on sidebar selection
+                if (this.id === 'sidebarNotes') {
+                    document.querySelector('.Note-Content').style.display = 'block';
+                    document.querySelector('.Home-Content').style.display = 'none';
+                    document.querySelector('.sharing-Content').style.display = 'none';
+                } else if (this.id === 'sidebarHome') {
+                    document.querySelector('.Home-Content').style.display = 'block';
+                    document.querySelector('.Note-Content').style.display = 'none';
+                    document.querySelector('.sharing-Content').style.display = 'none';
+                }
+                else if (this.id === 'sidebarSharing') {
+                    document.querySelector('.sharing-Content').style.display = 'block';
+                    document.querySelector('.Note-Content').style.display = 'none';
+                    document.querySelector('.Home-Content').style.display = 'none';
+                }
             });
         });
 
