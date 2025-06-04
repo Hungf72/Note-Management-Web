@@ -36,8 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("INSERT INTO users 
             (firstName, lastName, age, phone, email, password, is_active)
             VALUES 
-            (:firstName, :lastName, :age, :phone, :email, :password, 0)");        
-            $stmt->execute([
+            (:firstName, :lastName, :age, :phone, :email, :password, 0)");
+
+        $stmt->execute([
             ':firstName' => $firstName,
             ':lastName'  => $lastName,
             ':age'       => $age,
@@ -47,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         
         $userId = $pdo->lastInsertId();
-        
         $_SESSION['user'] = [
             'id' => $userId, 
             'email' => $email,
@@ -56,19 +56,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'age' => $age,
             'phone' => $phone
         ];
-        
+
         // Gửi email kích hoạt
-        $activation_link = "http://localhost/Note-Management-Web/Note-Web/views/activate.html?email=" . urlencode($email);        
+        $activation_link = "http://localhost/Note-Management-Web/Note-Web/views/activate.html?email=" . urlencode($email);
+
         echo json_encode([
             'status' => 'success',
             'message' => 'Registed Successfull! Please check email for activating account.',
             'activation_link' => $activation_link,
             'email' => $email,
-            'userId' => $userId,
-            'firstName' => $firstName,
-            'lastName' => $lastName,
-            'age' => $age,
-            'phone' => $phone
         ]);
         exit;
 
