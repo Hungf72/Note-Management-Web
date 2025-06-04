@@ -96,7 +96,7 @@
     <link rel="stylesheet" href="/Note-Management-Web/Note-Web/userInfo.css">
 </head>
 <body class="light-mode">
-
+    
     <!-- sidebar -->
     <div class="sidebar">
         <!-- welcome user -->
@@ -115,6 +115,7 @@
     <div class="Home-Content container mt-5">
         <!-- message activation -->
         <div class="alert alert-info mt-3" id="activationMsg" style="display: none;"></div>
+        
         <h1>Welcome to your Note App!</h1>
         <p>This is the home page where you can manage your notes.</p>
     </div>
@@ -510,7 +511,7 @@
             .then(data => {
                 const select = document.getElementById('shareNotes');
                 select.innerHTML = '';
-                
+
                 if (data.status === 'success' && Array.isArray(data.notes)) {
                     data.notes.forEach(note => {
                         const option = document.createElement('option');
