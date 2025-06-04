@@ -250,23 +250,27 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         const selectedLabels = Array.from(noteLabelsSelect.selectedOptions).map(opt => opt.value);
+        const imageFile = document.getElementById('imageUpload').files[0];
+        
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('labels', selectedLabels.join(','));
+        formData.append('action', 'create');
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                title,
-                content,
-                labels: selectedLabels.join(','),
-                action: 'create'
-            })
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
                 document.getElementById('noteTitle').value = '';
                 document.getElementById('noteContent').value = '';
+                document.getElementById('imageUpload').value = '';
                 fetchNotes();
             } else {
                 alert('Error creating note: ' + data.message);
@@ -358,6 +362,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     return label ? `<span class='badge badge-info mr-1'>${label.name}</span>` : '';
                 }).join('');
             }
+
+            // Add image if present
+            let imageHtml = '';
+            if (note.image_path) {
+                imageHtml = `
+                    <div class="mb-3">
+                        <img src="${note.image_path}" alt="Note image" class="img-fluid rounded" style="max-height: 200px;">
+                    </div>`;
+            }
+
             noteCard.innerHTML = `
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
