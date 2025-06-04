@@ -105,13 +105,13 @@
             <h5 class="mb-0"><span id="userName">Guest</span></h5>
         </div>
 
-        <a href="home.html" class="sidebar-link active" id="sidebarHome"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="sidebar-link active" id="sidebarHome"><i class="fas fa-home"></i> Home</a>
         <a href="#" class="sidebar-link" id="sidebarNotes"><i class="fas fa-sticky-note"></i> Notes</a>
-        <a href="#" class="sidebar-link" id="sidebarSettings"><i class="fas fa-user-friends"></i> Sharing</a>
+        <a href="#" class="sidebar-link" id="sidebarSharing"><i class="fas fa-user-friends"></i> Sharing</a>
         <a href="login.html" class="sidebar-link" id="logOut"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
-    <!-- main content -->
+    <!-- home -->
     <div class="Home-Content container mt-5">
         <!-- message activation -->
         <div class="alert alert-info mt-3" id="activationMsg" style="display: none;"></div>
@@ -120,7 +120,7 @@
         <p>This is the home page where you can manage your notes.</p>
     </div>
 
-
+    <!-- notes -->
     <div class="Note-Content container mt-4 main-content" style="display: none;">
         <div class="card mb-4">
             <div class="card-header">
@@ -174,10 +174,31 @@
         <div id="notesList"></div>
     </div>
 
+    <!-- sharing note -->
+    <div class="sharing-Content container mt-5" style="display: none;">
+        <div class="card shadow p-4" style="max-width: 500px; margin: 0 auto;">
+            <h4 class="mb-3">Share Notes</h4>
+            <form id="shareNoteForm">
+                <div class="form-group mb-3">
+                    <label for="shareEmail">Recipient Email</label>
+                    <input type="email" class="form-control" id="shareEmail" placeholder="Enter recipient's email" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="shareNotes">Select Notes to Share</label>
+                    <select multiple class="form-control" id="shareNotes" required>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Share</button>
+            </form>
+        </div>
+    </div>
+
     <!-- pop up userinfo modal-->
     <div id="popupModal" class="card shadow-lg border-0" style="display:none; position: fixed; top: 60px; left: 20px; width: 280px; z-index: 1050; border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);">
         <div class="card-body p-4">
             <div class="d-flex align-items-center mb-2">
+                <img id="popupAvatar" class="rounded-circle mb-2" style="width:60px;height:60px;object-fit:cover;" src="/Note-Management-Web/Note-Web/images/personal.png" alt="Avatar">
                 <div class="ml-2">
                     <div id="nameAccount" class="popup-user-name">Name</div>
                     <div id="gmailAccount" class="popup-user-email">gmail</div>
@@ -252,6 +273,8 @@
         </div>
     </div>
 
+    
+
     <script>
         const email = localStorage.getItem("email");
         if (!email) {
@@ -315,6 +338,22 @@
             link.addEventListener('click', function() {
                 document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
+
+                // Show/hide content based on sidebar selection
+                if (this.id === 'sidebarNotes') {
+                    document.querySelector('.Note-Content').style.display = 'block';
+                    document.querySelector('.Home-Content').style.display = 'none';
+                    document.querySelector('.sharing-Content').style.display = 'none';
+                } else if (this.id === 'sidebarHome') {
+                    document.querySelector('.Home-Content').style.display = 'block';
+                    document.querySelector('.Note-Content').style.display = 'none';
+                    document.querySelector('.sharing-Content').style.display = 'none';
+                }
+                else if (this.id === 'sidebarSharing') {
+                    document.querySelector('.sharing-Content').style.display = 'block';
+                    document.querySelector('.Note-Content').style.display = 'none';
+                    document.querySelector('.Home-Content').style.display = 'none';
+                }
             });
         });
 
@@ -488,6 +527,56 @@
                     option.textContent = 'No notes found';
                     select.appendChild(option);
                 }
+            });
+        });
+
+        // share note submit
+        document.getElementById('shareNoteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = localStorage.getItem('email');
+            const shareEmail = document.getElementById('shareEmail').value.trim();
+
+            if (email === shareEmail) {
+                alert('Vui lòng nhập email khác để chia sẻ ghi chú!');
+                return;
+            }
+
+            // check activation
+            fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(email)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' && !data.is_active) {
+                    alert('Bạn cần kích hoạt tài khoản để chia sẻ ghi chú!');
+                    return;
+                }
+                // check recipient email exists
+                fetch(`/Note-Management-Web/Note-Web/controllers/getUser.php?email=${encodeURIComponent(shareEmail)}`)
+                .then(res => res.json())
+                .then(userData => {
+                    if (userData.status !== 'success') {
+                        alert('Email người nhận không tồn tại!');
+                        return;
+                    }
+                    // check recipient activation
+                    fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(shareEmail)}`)
+                    .then(res => res.json())
+                    .then(shareEmailData => {
+                        if (shareEmailData.status === 'success' && !shareEmailData.is_active) {
+                            alert('Tài khoản người nhận chưa được kích hoạt!');
+                            return;
+                        }
+                        // TODO: Thực hiện logic chia sẻ ghi chú ở đây
+                        alert('Có thể chia sẻ ghi chú! (Demo)');
+                    })
+                    .catch(err => {
+                        alert('Lỗi khi kiểm tra kích hoạt người nhận!');
+                    });
+                })
+                .catch(err => {
+                    alert('Email người nhận không tồn tại!');
+                    console.log(err);
+                });
             });
         });
     </script>
