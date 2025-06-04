@@ -188,17 +188,11 @@
             body: formData
         })
         .then(response => response.json())
-        .then(data => {            
-          showModal(data.message);
+        .then(data => {
+            showModal(data.message);
             if (data.status === "success") {
                 localStorage.setItem('activation_link', data.activation_link);
-                localStorage.setItem('email', data.email);
-                localStorage.setItem('userId', data.userId);
-                localStorage.setItem('firstName', data.firstName);
-                localStorage.setItem('lastName', data.lastName);
-                localStorage.setItem('age', data.age);
-                localStorage.setItem('phone', data.phone);
-                
+                localStorage.setItem('email',data.email);
                 setTimeout(() => {
                     window.location.href = "home.html";
                 }, 1000);
