@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let contentHtml = '';
             if (note.note_password && note.note_password.length > 0) {
                 contentHtml = `
-                    <div class="alert alert-warning d-flex align-items-center">
+                    <div class="alert alert-warning">
                         <i class="fas fa-lock mr-2"></i> This note is password protected.
                     </div>
                     <button class="btn btn-sm btn-outline-primary view-protected-btn" data-id="${note.id}">View</button>
