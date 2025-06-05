@@ -109,16 +109,29 @@
             if (!$noteId) {
                 echo json_encode(['status' => 'error', 'message' => 'ID note không hợp lệ.']);
                 exit;
-            }
-
+            }            
             try {
-                // First delete the note-label associations
+                $stmt = $pdo->prepare("SELECT image_path FROM notes WHERE id = :id AND user_id = :user_id");
+                $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
+                $note = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                // Delete the associated image file 
+                if ($note && $note['image_path']) {
+                    $imagePath = __DIR__ . '/../' . $note['image_path'];
+                    if (file_exists($imagePath) && !unlink($imagePath)) {
+                        echo json_encode(['status' => 'error', 'message' => 'Cannot delete the image file.']);
+                        exit;
+                    }
+                }
+
+                // Then delete the note-label associations
                 $stmt = $pdo->prepare("DELETE FROM note_labels WHERE note_id = :note_id");
                 $stmt->execute(['note_id' => $noteId]);
 
-                // Then delete the note
+                // Finally delete the note itself
                 $stmt = $pdo->prepare("DELETE FROM notes WHERE id = :id AND user_id = :user_id");
                 $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
+
 
                 echo json_encode(['status' => 'success', 'message' => 'Note đã được xóa thành công.']);
             } catch (PDOException $e) {
