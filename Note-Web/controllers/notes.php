@@ -39,6 +39,7 @@
             $content = trim($_POST['content'] ?? '');
             $userId = $_SESSION['user']['id'] ?? null;
             $labels = !empty($_POST['labels']) ? explode(',', $_POST['labels']) : [];
+            $password = trim($_POST['note_password'] ?? '');
 
             if (!$userId) {
                 echo json_encode(['status' => 'error', 'message' => 'Bạn cần đăng nhập để tạo note.']);
@@ -67,12 +68,13 @@
             }
 
             try {
-                $stmt = $pdo->prepare("INSERT INTO notes (title, content, user_id, image_path) VALUES (:title, :content, :user_id, :image_path)");
+                $stmt = $pdo->prepare("INSERT INTO notes (title, content, user_id, image_path, note_password) VALUES (:title, :content, :user_id, :image_path, :note_password)");
                 $stmt->execute([
                     'title' => $title,
                     'content' => $content,
                     'user_id' => $userId,
-                    'image_path' => $imagePath
+                    'image_path' => $imagePath,
+                    'note_password' => $password
                 ]);
                 $noteId = $pdo->lastInsertId();
 
@@ -159,6 +161,7 @@
             $stmt = $pdo->prepare("SELECT * FROM notes WHERE id = :id AND user_id = :user_id");
             $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
             $note = $stmt->fetch(PDO::FETCH_ASSOC);
+
             if ($note) {             
                 $labelStmt = $pdo->prepare("SELECT label_id FROM note_labels WHERE note_id = :note_id");
                 $labelStmt->execute(['note_id' => $noteId]);
@@ -191,10 +194,20 @@
                             unlink($oldImagePath);
                         }
                     }
-                    
                     $updateStmt = $pdo->prepare("UPDATE notes SET image_path = :image_path WHERE id = :id AND user_id = :user_id");
                     $updateStmt->execute(['image_path' => $imagePath, 'id' => $noteId, 'user_id' => $userId]);
                     $note['image_path'] = $imagePath; 
+                }
+
+                if (isset($_POST['remove_password']) && $_POST['remove_password'] == '1') {
+                    $updateStmt = $pdo->prepare("UPDATE notes SET note_password = NULL WHERE id = :id AND user_id = :user_id");
+                    $updateStmt->execute(['id' => $noteId, 'user_id' => $userId]);
+                    $note['note_password'] = null;
+                } else if (isset($_POST['note_password']) && !empty($_POST['note_password'])) {
+                    $password = trim($_POST['note_password']);
+                    $updateStmt = $pdo->prepare("UPDATE notes SET note_password = :note_password WHERE id = :id AND user_id = :user_id");
+                    $updateStmt->execute(['note_password' => $password, 'id' => $noteId, 'user_id' => $userId]);
+                    $note['note_password'] = $password;
                 }
 
                 echo json_encode(['status' => 'success', 'note' => $note]);
@@ -275,6 +288,7 @@
                     'id' => $noteIT,
                     'user_id' => $userId
                 ]);
+            }
 
             // Remove old label associations
             $delStmt = $pdo->prepare("DELETE FROM note_labels WHERE note_id = :note_id");
@@ -289,7 +303,16 @@
                     }
                 }
             }
-        }
+
+            if (isset($_POST['remove_password']) && $_POST['remove_password'] == '1') {
+                $updateStmt = $pdo->prepare("UPDATE notes SET note_password = NULL WHERE id = :id AND user_id = :user_id");
+                $updateStmt->execute(['id' => $noteIT, 'user_id' => $userId]);
+            } else if (isset($_POST['note_password']) && !empty($_POST['note_password'])) {
+                $password = trim($_POST['note_password']);
+                $updateStmt = $pdo->prepare("UPDATE notes SET note_password = :note_password WHERE id = :id AND user_id = :user_id");
+                $updateStmt->execute(['note_password' => $password, 'id' => $noteIT, 'user_id' => $userId]);
+            }
+
             echo json_encode(['status' => 'success', 'message' => 'Note đã được tự động lưu thành công.']);
         } catch (PDOException $e) {
             echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
@@ -332,6 +355,30 @@
             echo json_encode(['status' => 'success', 'message' => 'Note pin status updated']);
         } catch (PDOException $e) {
             echo json_encode(['status' => 'error', 'message' => 'System error: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
+    function checkPassword(){
+        global $pdo;
+        $noteId = $_POST['id'] ?? null;
+        $password = $_POST['password'] ?? '';
+        $userId = $_SESSION['user']['id'] ?? null;
+        if (!$userId || !$noteId) {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
+            exit;
+        }
+        $stmt = $pdo->prepare("SELECT content, note_password FROM notes WHERE id = :id AND user_id = :user_id");
+        $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
+        $note = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$note) {
+            echo json_encode(['status' => 'error', 'message' => 'Note not found']);
+            exit;
+        }
+        if ($note['note_password'] === $password) {
+            echo json_encode(['status' => 'success', 'content' => $note['content']]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Incorrect password.']);
         }
         exit;
     }
@@ -382,6 +429,8 @@
             case 'togglePin':
                 togglePin();
                 break;
+            case 'view_protected':
+                checkPassword();
             default:
                 echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
                 exit;
