@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     saveNewLabelBtn.addEventListener('click', () => {
-        if (isEditingLabels) return; // Prevent creating a new label while editing
+        if (isEditingLabels) return; 
 
         const name = newLabelName.value.trim();
         if (!name) return;
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.status === 'success'){
                     refreshLabels();
                     isEditingLabels = false;
-                    saveNewLabelBtn.onclick = null; // Reset the click handler
+                    saveNewLabelBtn.onclick = null; 
                     addLabelInputGroup.style.display = 'none';
                     newLabelName.value = '';
                 }
@@ -232,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // Fetch and show labels on load
     function fetchLabels() {
         fetch('/Note-Management-Web/Note-Web/controllers/labels.php', { method: 'GET' })
         .then(response => response.json())
@@ -288,8 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                allNotes = data.notes; // Store all notes for searching
-                fetchLabelsAndUpdateSelect(); // Ensure labels are updated
+                allNotes = data.notes; 
+                fetchLabelsAndUpdateSelect();
                 displayNotes(data.notes);
             } else {
                 console.error('Note fetching error:', data.message);
