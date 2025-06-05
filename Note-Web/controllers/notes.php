@@ -115,7 +115,6 @@
                 $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
                 $note = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                // Delete the associated image file 
                 if ($note && $note['image_path']) {
                     $imagePath = __DIR__ . '/../' . $note['image_path'];
                     if (file_exists($imagePath) && !unlink($imagePath)) {
@@ -246,7 +245,6 @@
                     exit;
                 }
                 
-                // Delete old image 
                 if ($note && $note['image_path']) {
                     $oldImagePath = __DIR__ . '/../' . $note['image_path'];
                     if (file_exists($oldImagePath)) {
