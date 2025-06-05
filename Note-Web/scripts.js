@@ -250,7 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const selectedLabels = Array.from(noteLabelsSelect.selectedOptions).map(opt => opt.value);
         const imageFile = document.getElementById('imageUpload').files[0];
-        
+        const password = document.getElementById('notePassword').value.trim();
+
         const formData = new FormData();
         formData.append('title', title);
         formData.append('content', content);
@@ -259,6 +260,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (imageFile) {
             formData.append('image', imageFile);
         }
+
+        if (password) {
+            formData.append('note_password', password);
+        }
+
 
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
             method: 'POST',
@@ -345,7 +351,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (a.is_pinned !== b.is_pinned) {
                 return b.is_pinned - a.is_pinned; // Pinned notes first
             }
-            // For notes with same pin status, sort by last modified date
             return new Date(b.last_modified) - new Date(a.last_modified);
         });
 
@@ -353,7 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const pinIconClass = note.is_pinned == 1 ? 'bi bi-pin-angle-fill' : 'bi bi-pin-angle';
             const noteCard = document.createElement('div');
             noteCard.className = `card note-card mb-3 ${note.is_pinned == 1 ? 'pinned-note' : ''}`;
-            
             // Show labels as badges
             let labelBadges = '';
             if (note.labels && note.labels.length) {
@@ -361,8 +365,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const label = allLabels.find(label => label.id == labelid);
                     return label ? `<span class='badge badge-info mr-1'>${label.name}</span>` : '';
                 }).join('');
-            }           
-            let imageHtml = '';            
+            }
+            let imageHtml = '';
             if (note.image_path) {
                 const imagePath = '/Note-Management-Web/Note-Web/' + note.image_path;
                 imageHtml = `
@@ -370,7 +374,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img src="${imagePath}" alt="Note image" class="img-fluid rounded" style="max-height: 200px;" onerror="this.style.display='none'">
                     </div>`;
             }
-
+            let contentHtml = '';
+            if (note.note_password && note.note_password.length > 0) {
+                contentHtml = `
+                    <div class="alert alert-warning d-flex align-items-center">
+                        <i class="fas fa-lock mr-2"></i> This note is password protected.
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary view-protected-btn" data-id="${note.id}">View</button>
+                    <div class="protected-content mt-2" style="display:none;"></div>
+                `;
+            } else {
+                contentHtml = `<p class="card-text">${note.content || ''}</p>`;
+            }
             noteCard.innerHTML = `
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
@@ -379,8 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div>${labelBadges}</div>
                     ${imageHtml}
-                    <p class="card-text">${note.content || ''}</p>
-                    <div class="d-flex align-items-center">
+                    ${contentHtml}
+                    <div class="d-flex align-items-center mt-2">
                         <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
                         <button class="btn btn-sm btn-primary edit-btn pl-3 pr-3 ml-3" data-id="${note.id}">Edit</button>
                         <button class="btn btn-sm btn-danger delete-btn pl-3 pr-3 ml-3" data-id="${note.id}">Delete</button>
@@ -388,6 +403,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             notesList.appendChild(noteCard);
+        });
+
+        document.querySelectorAll('.view-protected-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const noteId = this.getAttribute('data-id');
+                const password = prompt('Enter password to view this note:');
+                const protectedContentDiv = this.parentElement.querySelector('.protected-content');
+                fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'view_protected', id: noteId, password: password })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        protectedContentDiv.innerHTML = `<p class='card-text'>${data.content}</p>`;
+                        protectedContentDiv.style.display = 'block';
+                        this.style.display = 'none';
+                    } else {
+                        alert(data.message || 'Incorrect password.');
+                    }
+                });
+            });
         });
     }
 
@@ -500,7 +538,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const selectedLabels = Array.from(noteLabelsSelect.selectedOptions).map(opt => opt.value);
         const imageFile = document.getElementById('imageUpload').files[0];
-        
+        const passwordInput = document.getElementById('enablePasswordProtection');
+        const notePassword = document.getElementById('notePassword').value.trim();
         const formData = new FormData();
         formData.append('id', noteId);
         formData.append('title', title);
@@ -509,6 +548,14 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('action', 'autosave');
         if (imageFile) {
             formData.append('image', imageFile);
+        }
+
+        if (passwordInput.checked) {
+            if (notePassword) {
+                formData.append('note_password', notePassword);
+            }
+        } else {
+            formData.append('remove_password', '1');
         }
 
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
