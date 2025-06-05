@@ -70,7 +70,7 @@
   <div class="circle pink"></div>
   <div class="circle blue"></div>
 <!-- forgot -->
-  <div class="glass z-10 p-8 w-[90%] max-w-md shadow-2xl">
+  <div class="glass z-10 p-8 w-[90%] max-w-md shadow-2xl" id="forgotContainer">
     <h2 class="text-2xl font-semibold mb-4 text-center">Forgot Password</h2>
 
     <form id="forgotForm" class="space-y-5">
@@ -102,7 +102,7 @@
     </form>
   </div>
 <!-- reset -->
-  <div class="glass z-10 p-8 w-[90%] max-w-md shadow-2xl" style="display: none;">
+  <div class="glass z-10 p-8 w-[90%] max-w-md shadow-2xl" id="resetContainer" style="display: none;">
     <h2 class="text-2xl font-semibold mb-4 text-center">Reset Password</h2>
     <form id="resetForm" class=" space-y-5 mt-6">
       <div>
@@ -197,12 +197,12 @@
                     modalMessage.innerHTML = `<span class="text-danger">${data.message}</span>`;
                 }
 
-                $('#message-dialog').modal('show');
+                document.getElementById("modal").classList.remove('hidden');
             })
             .catch(err => {
                 console.error('Error:', err);
                 modalMessage.innerHTML = `<span class="text-danger">An error occurred while sending the request.</span>`;
-                $('#message-dialog').modal('show');
+                document.getElementById("modal").classList.remove('hidden');
             });
         });
 
@@ -214,33 +214,31 @@
             if (enteredCode === generatedCode) {
                 modalMessage.innerHTML = `<span class="text-success">✅ The confirmation code is correct! You can continue to reset your password.</span>`;
 
-                document.getElementById("forgotForm").style.display = "none";
-                document.getElementById("resetForm").style.display = "block";
+                document.getElementById("forgotContainer").style.display = "none";
+                document.getElementById("resetContainer").style.display = "block";
 
                 const email = document.getElementById('email').value;
-                document.querySelector('#resetForm #email').value = email;
-
-                document.querySelector('#resetForm #email').readOnly = true;
+                document.getElementById('resetEmail').value = email;
+                document.getElementById('resetEmail').readOnly = true;
             } 
             else{
                 modalMessage.innerHTML = `<span class="text-danger">❌ The verification code is incorrect. Please check again.</span>`;
             }
-
-            $('#message-dialog').modal('show');
+            document.getElementById("modal").classList.remove('hidden');
         });
 
         // thay doi mat khau
         document.getElementById("resetForm").addEventListener("submit", function (e) {
             e.preventDefault();
 
-            const email = this.querySelector("#email").value.trim();
+            const email = this.querySelector("#resetEmail").value.trim();
             const password = this.querySelector("#password").value.trim();
             const confirmPassword = this.querySelector("#confirmPassword").value.trim();
             const modalMessage = document.getElementById('modalMessage');
 
             if (password !== confirmPassword) {
                 modalMessage.innerHTML = '<span class="text-danger">❌ Confirmation password does not match.</span>';
-                $('#message-dialog').modal('show');
+                document.getElementById("modal").classList.remove('hidden');
                 return;
             }
 
@@ -264,13 +262,12 @@
                 else {
                     modalMessage.innerHTML = `<span class="text-danger">${data.message}</span>`;
                 }
-
-                $('#message-dialog').modal('show');
+                document.getElementById("modal").classList.remove('hidden');
             })
             .catch(err => {
                 console.error('Lỗi:', err);
                 modalMessage.innerHTML = '<span class="text-danger">An error occurred while updating password.</span>';
-                $('#message-dialog').modal('show');
+                document.getElementById("modal").classList.remove('hidden');
             });
         });
 
