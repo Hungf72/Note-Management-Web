@@ -256,6 +256,27 @@
         exit;
     }
 
+    // Xử lý action markSharedRead để cập nhật is_share=0 cho các note được chia sẻ
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (isset($input['action']) && $input['action'] === 'markSharedRead' && !empty($input['note_ids'])) {
+            $userId = $_SESSION['user']['id'] ?? null;
+            $noteIds = array_map('intval', $input['note_ids']);
+
+            if ($userId && count($noteIds) > 0) {
+                $in = str_repeat('?,', count($noteIds) - 1) . '?';
+                $sql = "UPDATE notes SET is_share=0 WHERE user_id=? AND id IN ($in)";
+                $params = array_merge([$userId], $noteIds);
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
+                echo json_encode(['status' => 'success', 'message' => 'Đã đánh dấu đã đọc ghi chú chia sẻ.']);
+                exit;
+            }
+            echo json_encode(['status' => 'error', 'message' => 'Thiếu thông tin user hoặc note.']);
+            exit;
+        }
+    }
+
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $id = $_GET['id'] ?? null;
         $action = $_GET['action'] ?? '';
@@ -265,7 +286,8 @@
         } else {
             getNOTES();
         }
-    } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    } 
+    elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
         switch ($action) {
             case 'create':
@@ -284,7 +306,8 @@
                 echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
                 exit;
         }
-    } else {
+    } 
+    else {
         echo json_encode(['status' => 'error', 'message' => 'Unsupported request method']);
         exit;
     }
