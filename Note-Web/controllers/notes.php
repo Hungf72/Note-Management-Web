@@ -126,11 +126,9 @@
                     }
                 }
 
-                // Then delete the note-label associations
                 $stmt = $pdo->prepare("DELETE FROM note_labels WHERE note_id = :note_id");
                 $stmt->execute(['note_id' => $noteId]);
 
-                // Finally delete the note itself
                 $stmt = $pdo->prepare("DELETE FROM notes WHERE id = :id AND user_id = :user_id");
                 $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
 
