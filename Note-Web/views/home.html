@@ -335,6 +335,46 @@
             .catch(error => {
                 console.error('Lỗi khi lấy user:', error);
             });
+
+            // hien thong bao ghi chu chia se
+            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' && Array.isArray(data.notes)) {
+                    const sharedNotes = data.notes.filter(note => note.is_share == 1);
+                    if (sharedNotes.length > 0) {
+                        const msg = `Bạn có ${sharedNotes.length} ghi chú vừa được chia sẻ. <a href="#" id="viewSharedNotes">Xem ngay</a>`;
+                        let alertBox = document.createElement('div');
+
+                        alertBox.className = 'alert alert-warning mt-3';
+                        alertBox.innerHTML = msg;
+                        document.querySelector('.Home-Content').prepend(alertBox);
+                        
+                        // click vao xem 
+                        alertBox.querySelector('#viewSharedNotes').addEventListener('click', function(e) {
+                            e.preventDefault();
+                            // Store shared note IDs in localStorage for highlight after tab switch
+                            const sharedNoteIds = sharedNotes.map(n => n.id);
+                            // cap nhat lai note is_share = 0
+                            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                                method: 'POST',
+                                credentials: 'include',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'markSharedRead', note_ids: sharedNoteIds })
+                            })
+                            .then(res => res.json())
+                            .then(result => {
+                                if (result.status === 'success') {
+                                    alertBox.remove();
+                                   
+                                }
+                            });
+                        });
+                    }
+                }
+            });
         })
 
         // sidebar active state toggle
@@ -343,11 +383,12 @@
                 document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
 
-                // Show/hide content based on sidebar selection
+                // show/hide content based on sidebar selection
                 if (this.id === 'sidebarNotes') {
                     document.querySelector('.Note-Content').style.display = 'block';
                     document.querySelector('.Home-Content').style.display = 'none';
                     document.querySelector('.sharing-Content').style.display = 'none';
+                    highlightSharedNotesIfNeeded();
                 } else if (this.id === 'sidebarHome') {
                     document.querySelector('.Home-Content').style.display = 'block';
                     document.querySelector('.Note-Content').style.display = 'none';
@@ -457,7 +498,7 @@
             applyAppearance('light');
         }
 
-        // Save mode to localStorage (per user) when changed
+        // save mode 
         function selectAppearance(mode) {
             document.getElementById('appearanceLight').checked = (mode === 'light');
             document.getElementById('appearanceDark').checked = (mode === 'dark');
@@ -465,7 +506,7 @@
             applyAppearance(mode);
         }
 
-        // Click image, label, or container to select radio button for appearance
+        // click image, label, or container to select
         document.getElementById('imgLightMode').addEventListener('click', function() {
             selectAppearance('light');
         });
@@ -499,7 +540,7 @@
             }
         });
         
-        // Update avatar in popup userinfo modal
+        // update avatar in popup userinfo modal
         function updatePopupAvatar(url) {
             var avatar = document.getElementById('popupAvatar');
             if (avatar) {
@@ -572,8 +613,32 @@
                             alert('Tài khoản người nhận chưa được kích hoạt!');
                             return;
                         }
-                        alert('Chia sẻ ghi chú thành công!');
                         
+                        const selectedNotes = Array.from(document.getElementById('shareNotes').selectedOptions).map(opt => opt.value);
+                        const formData = new FormData();
+
+                        formData.append('email', shareEmail);
+                        formData.append('note_ids', selectedNotes.join(','));
+                        
+                        // share notes
+                        fetch('/Note-Management-Web/Note-Web/controllers/shareNotes.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(res => res.json())
+                        .then(result => {
+                            if (result.status === 'success') {
+                                alert('Chia sẻ ghi chú thành công!');
+                                window.location.reload();
+                            } 
+                            else {
+                                alert(result.message || 'Chia sẻ ghi chú thất bại!');
+                            }
+                        })
+                        .catch(err => {
+                            alert('Lỗi khi chia sẻ ghi chú!');
+                            console.log(err);
+                        });
                     })
                     .catch(err => {
                         alert('Lỗi khi kiểm tra kích hoạt người nhận!');
@@ -585,6 +650,7 @@
                 });
             });
         });
+
     </script>
 
     <script src="/Note-Management-Web/Note-Web/scripts.js"></script>
