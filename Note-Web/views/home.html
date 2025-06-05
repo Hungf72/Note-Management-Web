@@ -149,6 +149,13 @@
                         <label for="imageUpload">Choose an image</label>
                         <input type="file" class="form-control-file" id="imageUpload" accept="image/*">
                     </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="enablePasswordProtection">
+                            <label class="form-check-label" for="enablePasswordProtection">Enable password protection</label>
+                        </div>
+                        <input type="password" class="form-control mt-2" id="notePassword" placeholder="Set a password for this note" style="display:none;">
+                    </div>
                     <button type="submit" class="btn btn-primary" id="noteFormBtn">Create Note</button>
                 </form>
             </div>
@@ -637,7 +644,7 @@
                             body: formData
                         })
                         .then(res => res.json())
-                        .then(result => {
+                        .then (result => {
                             if (result.status === 'success') {
                                 alert('Chia sẻ ghi chú thành công!');
                                 window.location.reload();
@@ -665,6 +672,19 @@
         document.getElementById('startWritingLink').addEventListener('click', function(e) {
             e.preventDefault();
             document.getElementById('sidebarNotes').click();
+        });
+
+        // Hien thi input password khi checkbox duoc chon
+        document.getElementById('enablePasswordProtection').addEventListener('change', function() {
+            const passwordInput = document.getElementById('notePassword');
+            if (this.checked) {
+                passwordInput.style.display = 'block';
+                passwordInput.setAttribute('required', 'required');
+            } else {
+                passwordInput.style.display = 'none';
+                passwordInput.removeAttribute('required');
+                passwordInput.value = '';
+            }
         });
 
     </script>
