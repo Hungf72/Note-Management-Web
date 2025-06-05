@@ -189,9 +189,7 @@
                 </div>
                 <div class="form-group mb-3">
                     <label for="shareNotes">Select Notes to Share</label>
-                    <select multiple class="form-control" id="shareNotes" required>
-                        <!-- Options will be populated dynamically -->
-                    </select>
+                    <select multiple class="form-control" id="shareNotes" required></select>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Share</button>
             </form>
@@ -355,8 +353,8 @@
                         // click vao xem 
                         alertBox.querySelector('#viewSharedNotes').addEventListener('click', function(e) {
                             e.preventDefault();
-                            // Store shared note IDs in localStorage for highlight after tab switch
                             const sharedNoteIds = sharedNotes.map(n => n.id);
+                            
                             // cap nhat lai note is_share = 0
                             fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
                                 method: 'POST',
@@ -368,7 +366,15 @@
                             .then(result => {
                                 if (result.status === 'success') {
                                     alertBox.remove();
-                                   
+                                    // Chuyển sang tab Notes
+                                    document.getElementById('sidebarNotes').click();
+                                    // Cuộn xuống list note
+                                    setTimeout(function() {
+                                        var notesList = document.getElementById('notesList');
+                                        if (notesList) {
+                                            notesList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        }
+                                    }, 300);
                                 }
                             });
                         });
