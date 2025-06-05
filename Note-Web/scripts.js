@@ -491,8 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => {
             console.error('Connection error:', error);
         });
-    }
-
+    }    
     function updateNote(noteId) {
         const title = document.getElementById('noteTitle').value.trim();
         const content = document.getElementById('noteContent').value.trim();
@@ -501,18 +500,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         const selectedLabels = Array.from(noteLabelsSelect.selectedOptions).map(opt => opt.value);
+        const imageFile = document.getElementById('imageUpload').files[0];
+        
+        const formData = new FormData();
+        formData.append('id', noteId);
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('labels', selectedLabels.join(','));
+        formData.append('action', 'autosave');
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                id: noteId,
-                title,
-                content,
-                labels: selectedLabels.join(','),
-                action: 'autosave'
-            })
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
@@ -530,10 +532,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-
-
-
-
-
-
