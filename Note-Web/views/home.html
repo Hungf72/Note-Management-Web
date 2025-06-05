@@ -118,6 +118,11 @@
         
         <h1>Welcome to your Note App!</h1>
         <p>This is the home page where you can manage your notes.</p>
+        
+        <div class="mt-4">
+            <span style="font-size:1.2rem; font-weight:500;">Let's get writing note.</span>
+            <a href="#" id="startWritingLink" style="margin-left: 18px; font-weight: 500; color: #007bff; text-decoration: underline; cursor: pointer;">Let's start nhập vào</a>
+        </div>
     </div>
 
     <!-- notes -->
@@ -287,7 +292,7 @@
             // active account
             fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(localStorage.getItem('email'))}`)
             .then(res => res.json())
-            .then(data => {
+            .then (data => {
                 const msgBox = document.getElementById('activationMsg');
                 if (data.status === 'success' && !data.is_active) {
                     const link = localStorage.getItem('activation_link');
@@ -354,7 +359,7 @@
                         alertBox.querySelector('#viewSharedNotes').addEventListener('click', function(e) {
                             e.preventDefault();
                             const sharedNoteIds = sharedNotes.map(n => n.id);
-                            
+
                             // cap nhat lai note is_share = 0
                             fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
                                 method: 'POST',
@@ -655,6 +660,11 @@
                     console.log(err);
                 });
             });
+        });
+
+        document.getElementById('startWritingLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('sidebarNotes').click();
         });
 
     </script>
