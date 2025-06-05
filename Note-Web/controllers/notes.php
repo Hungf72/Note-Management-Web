@@ -115,10 +115,10 @@
                 $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
                 $note = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                // Delete the associated image file 
                 if ($note && $note['image_path']) {
                     $imagePath = __DIR__ . '/../' . $note['image_path'];
                     if (file_exists($imagePath) && !unlink($imagePath)) {
+                        unlink($imagePath);
                         echo json_encode(['status' => 'error', 'message' => 'Cannot delete the image file.']);
                         exit;
                     }
@@ -159,11 +159,44 @@
             $stmt = $pdo->prepare("SELECT * FROM notes WHERE id = :id AND user_id = :user_id");
             $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
             $note = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($note) {
-                // Fetch label associations
+            if ($note) {             
                 $labelStmt = $pdo->prepare("SELECT label_id FROM note_labels WHERE note_id = :note_id");
                 $labelStmt->execute(['note_id' => $noteId]);
                 $note['labels'] = array_map('intval', array_column($labelStmt->fetchAll(PDO::FETCH_ASSOC), 'label_id'));
+
+                $imagePath = null;
+                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                    $uploadDir = __DIR__ . '/../uploads/';
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
+                    
+                    $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                    $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+                    
+                    if (!in_array($ext, $allowedTypes)) {
+                        echo json_encode(['status' => 'error', 'message' => 'Only JPG, JPEG, PNG & GIF files are allowed.']);
+                        exit;
+                    }
+                    
+                    $filename = 'note_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $filename)) {
+                        $imagePath = 'uploads/' . $filename;
+                    }
+                }                
+                if ($imagePath) {
+                    if ($note['image_path']) {
+                        $oldImagePath = __DIR__ . '/../' . $note['image_path'];
+                        if (file_exists($oldImagePath)) {
+                            unlink($oldImagePath);
+                        }
+                    }
+                    
+                    $updateStmt = $pdo->prepare("UPDATE notes SET image_path = :image_path WHERE id = :id AND user_id = :user_id");
+                    $updateStmt->execute(['image_path' => $imagePath, 'id' => $noteId, 'user_id' => $userId]);
+                    $note['image_path'] = $imagePath; 
+                }
+
                 echo json_encode(['status' => 'success', 'note' => $note]);
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy note.']);
@@ -172,7 +205,7 @@
             echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
         }
         exit;
-    }
+    }    
 
     function autoSaveNOTES() {
         global $pdo;
@@ -192,9 +225,56 @@
             exit;
         }
 
-        try{
-            $stmt = $pdo->prepare(("UPDATE notes SET title = :title, content = :content WHERE id = :id AND user_id = :user_id"));
-            $stmt->execute((['title' => $title, 'content' => $content, 'id' => $noteIT, 'user_id' => $userId]));
+        try {
+            $stmt = $pdo->prepare("SELECT image_path FROM notes WHERE id = :id AND user_id = :user_id");
+            $stmt->execute(['id' => $noteIT, 'user_id' => $userId]);
+            $note = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $imagePath = null;
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../uploads/';
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                
+                $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+                
+                if (!in_array($ext, $allowedTypes)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Only JPG, JPEG, PNG & GIF files are allowed.']);
+                    exit;
+                }
+                
+                if ($note && $note['image_path']) {
+                    $oldImagePath = __DIR__ . '/../' . $note['image_path'];
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+                
+                $filename = 'note_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $filename)) {
+                    $imagePath = 'uploads/' . $filename;
+                }
+            }
+
+            if ($imagePath) {
+                $stmt = $pdo->prepare("UPDATE notes SET title = :title, content = :content, image_path = :image_path WHERE id = :id AND user_id = :user_id");
+                $stmt->execute([
+                    'title' => $title,
+                    'content' => $content,
+                    'image_path' => $imagePath,
+                    'id' => $noteIT,
+                    'user_id' => $userId
+                ]);
+            } else {
+                $stmt = $pdo->prepare("UPDATE notes SET title = :title, content = :content WHERE id = :id AND user_id = :user_id");
+                $stmt->execute([
+                    'title' => $title,
+                    'content' => $content,
+                    'id' => $noteIT,
+                    'user_id' => $userId
+                ]);
 
             // Remove old label associations
             $delStmt = $pdo->prepare("DELETE FROM note_labels WHERE note_id = :note_id");
@@ -209,7 +289,7 @@
                     }
                 }
             }
-
+        }
             echo json_encode(['status' => 'success', 'message' => 'Note đã được tự động lưu thành công.']);
         } catch (PDOException $e) {
             echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);

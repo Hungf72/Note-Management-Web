@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     saveNewLabelBtn.addEventListener('click', () => {
-        if (isEditingLabels) return; // Prevent creating a new label while editing
+        if (isEditingLabels) return; 
 
         const name = newLabelName.value.trim();
         if (!name) return;
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.status === 'success'){
                     refreshLabels();
                     isEditingLabels = false;
-                    saveNewLabelBtn.onclick = null; // Reset the click handler
+                    saveNewLabelBtn.onclick = null; 
                     addLabelInputGroup.style.display = 'none';
                     newLabelName.value = '';
                 }
@@ -232,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // Fetch and show labels on load
     function fetchLabels() {
         fetch('/Note-Management-Web/Note-Web/controllers/labels.php', { method: 'GET' })
         .then(response => response.json())
@@ -288,8 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                allNotes = data.notes; // Store all notes for searching
-                fetchLabelsAndUpdateSelect(); // Ensure labels are updated
+                allNotes = data.notes; 
+                fetchLabelsAndUpdateSelect();
                 displayNotes(data.notes);
             } else {
                 console.error('Note fetching error:', data.message);
@@ -491,8 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => {
             console.error('Connection error:', error);
         });
-    }
-
+    }    
     function updateNote(noteId) {
         const title = document.getElementById('noteTitle').value.trim();
         const content = document.getElementById('noteContent').value.trim();
@@ -501,18 +499,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         const selectedLabels = Array.from(noteLabelsSelect.selectedOptions).map(opt => opt.value);
+        const imageFile = document.getElementById('imageUpload').files[0];
+        
+        const formData = new FormData();
+        formData.append('id', noteId);
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('labels', selectedLabels.join(','));
+        formData.append('action', 'autosave');
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                id: noteId,
-                title,
-                content,
-                labels: selectedLabels.join(','),
-                action: 'autosave'
-            })
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
@@ -530,10 +531,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-
-
-
-
-
-
