@@ -354,6 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const pinIconClass = note.is_pinned == 1 ? 'bi bi-pin-angle-fill' : 'bi bi-pin-angle';
             const noteCard = document.createElement('div');
             noteCard.className = `card note-card mb-3 ${note.is_pinned == 1 ? 'pinned-note' : ''}`;
+            
             // Show labels as badges
             let labelBadges = '';
             if (note.labels && note.labels.length) {
@@ -361,14 +362,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     const label = allLabels.find(label => label.id == labelid);
                     return label ? `<span class='badge badge-info mr-1'>${label.name}</span>` : '';
                 }).join('');
-            }
-
-            // Add image if present
-            let imageHtml = '';
+            }           
+            let imageHtml = '';            
             if (note.image_path) {
+                const imagePath = '/Note-Management-Web/Note-Web/' + note.image_path;
                 imageHtml = `
                     <div class="mb-3">
-                        <img src="${note.image_path}" alt="Note image" class="img-fluid rounded" style="max-height: 200px;">
+                        <img src="${imagePath}" alt="Note image" class="img-fluid rounded" style="max-height: 200px;" onerror="this.style.display='none'">
                     </div>`;
             }
 
@@ -379,6 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <i class="${pinIconClass} pin-icon" data-id="${note.id}" ></i>
                     </div>
                     <div>${labelBadges}</div>
+                    ${imageHtml}
                     <p class="card-text">${note.content || ''}</p>
                     <div class="d-flex align-items-center">
                         <small class="text-muted">Last modified: ${new Date(note.last_modified).toLocaleString()}</small>
