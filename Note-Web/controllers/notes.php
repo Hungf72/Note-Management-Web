@@ -165,6 +165,7 @@
                 $labelStmt->execute(['note_id' => $noteId]);
                 $note['labels'] = array_map('intval', array_column($labelStmt->fetchAll(PDO::FETCH_ASSOC), 'label_id'));
 
+                // Xử lý upload hình ảnh
                 $imagePath = null;
                 if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                     $uploadDir = __DIR__ . '/../uploads/';
@@ -241,6 +242,7 @@
             $stmt->execute(['id' => $noteIT, 'user_id' => $userId]);
             $note = $stmt->fetch(PDO::FETCH_ASSOC);
 
+            // Xử lý upload hình ảnh
             $imagePath = null;
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $uploadDir = __DIR__ . '/../uploads/';
@@ -301,7 +303,7 @@
                     }
                 }
             }
-
+            // Kiểm tra và cập nhật mật khẩu nếu có
             if (isset($_POST['remove_password']) && $_POST['remove_password'] == '1') {
                 $updateStmt = $pdo->prepare("UPDATE notes SET note_password = NULL WHERE id = :id AND user_id = :user_id");
                 $updateStmt->execute(['id' => $noteIT, 'user_id' => $userId]);
