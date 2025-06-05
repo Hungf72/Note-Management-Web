@@ -186,7 +186,6 @@
                     }
                 }                
                 if ($imagePath) {
-                    // Delete the old image
                     if ($note['image_path']) {
                         $oldImagePath = __DIR__ . '/../' . $note['image_path'];
                         if (file_exists($oldImagePath)) {
@@ -196,7 +195,7 @@
                     
                     $updateStmt = $pdo->prepare("UPDATE notes SET image_path = :image_path WHERE id = :id AND user_id = :user_id");
                     $updateStmt->execute(['image_path' => $imagePath, 'id' => $noteId, 'user_id' => $userId]);
-                    $note['image_path'] = $imagePath; // Update the image path 
+                    $note['image_path'] = $imagePath; 
                 }
 
                 echo json_encode(['status' => 'success', 'note' => $note]);
@@ -261,7 +260,6 @@
                 }
             }
 
-            // Update note with or without new image
             if ($imagePath) {
                 $stmt = $pdo->prepare("UPDATE notes SET title = :title, content = :content, image_path = :image_path WHERE id = :id AND user_id = :user_id");
                 $stmt->execute([
