@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }    
-    
+
     function createNote(title, content) {
         if (!title) {
             alert('Title is required.');
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const selectedLabels = Array.from(noteLabelsSelect.selectedOptions).map(opt => opt.value);
         const imageFile = document.getElementById('imageUpload').files[0];
-        const passwordEnabled = document.getElementById('enablePasswordProtection').checked;
+        const passwordEnabled = document.getElementById('enablePasswordProtection');
         const password = document.getElementById('notePassword').value.trim();
 
         const formData = new FormData();
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('image', imageFile);
         }
 
-        if (passwordEnabled && password) {
+        if (passwordEnabled.checked && password) {
             formData.append('note_password', password);
         }
 
