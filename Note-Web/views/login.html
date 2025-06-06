@@ -137,15 +137,42 @@
   </div>
 
   <!-- modal -->
-  <div class="fixed inset-0 z-20 bg-black/50 hidden items-center justify-center" id="modal">
-    <div class="bg-white text-black rounded-lg p-6 w-[90%] max-w-md text-center">
+  <div class="fixed inset-0 z-20 bg-black/50 hidden flex items-center justify-center" id="modal">
+  <div id="modalContent"
+        class="bg-white text-black rounded-lg p-6 w-[90%] max-w-md text-center opacity-0 translate-y-[-20px] transition-all duration-500">
       <h4 class="text-lg font-semibold mb-4">Notifications</h4>
-      <p id="modalMessage" class="mb-4"></p>
-      <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="document.getElementById('modal').classList.add('hidden')">Close</button>
+      <p id="modalMessage" class="mb-4">Successfull!!!</p>
+      <button class="bg-blue-500 text-white px-4 py-2 rounded"
+              onclick="closeModal()">Close</button>
     </div>
   </div>
 
+
+
   <script>
+    setTimeout(() => {
+    const modal = document.getElementById('modal');
+    const content = document.getElementById('modalContent');
+
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      content.classList.remove('opacity-0', 'translate-y-[-20px]');
+      content.classList.add('opacity-100', 'translate-y-0');
+    }, 50); 
+  }, 5000);
+
+  function closeModal() {
+    const modal = document.getElementById('modal');
+    const content = document.getElementById('modalContent');
+
+    
+    content.classList.remove('opacity-100', 'translate-y-0');
+    content.classList.add('opacity-0', 'translate-y-[-20px]');
+    
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 500);
+  }
 	const passwordInput = document.getElementById("password");
     const toggleBtn = document.getElementById("togglePassword");
     const eyeOpen = document.getElementById("eyeOpen");

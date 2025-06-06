@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="light">
-<script>
-  tailwind.config = {
-    darkMode: 'class'
-  }
-</script>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +12,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
      <script src="https://cdn.tailwindcss.com"></script>
+     <script>
+        tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            neko: '#ff69b4'
+          }
+        }
+      }
+    }
+    </script>
 
        <style>
         /* Light Mode */
@@ -288,12 +296,8 @@
 
     </div>
 
-    <script>
-        const email = localStorage.getItem("email");
-        if (!email) {
-            window.location.href = "login.html";
-        }
-        
+<script>
+
         document.addEventListener('DOMContentLoaded',()=>{
             // active account
             fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(localStorage.getItem('email'))}`)
@@ -302,7 +306,7 @@
                 const msgBox = document.getElementById('activationMsg');
                 if (data.status === 'success' && !data.is_active) {
                     const link = localStorage.getItem('activation_link');
-                    msgBox.innerHTML = `Your account is not activated. Click <a href="${link}" target="_blank">here to activate</a>.`;
+                    msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
                     msgBox.style.display = 'block';
                 } 
                 else {
@@ -310,7 +314,7 @@
                 }
             })
             .catch(error => {
-                console.error('Error while checking activation:', error);
+                console.error('Lỗi khi kiểm tra kích hoạt:', error);
             });
 
             // hien ten user
@@ -342,7 +346,7 @@
                 }
             })
             .catch(error => {
-                console.error('Error getting user:', error);
+                console.error('Lỗi khi lấy user:', error);
             });
 
             // hien thong bao ghi chu chia se
@@ -354,7 +358,7 @@
                 if (data.status === 'success' && Array.isArray(data.notes)) {
                     const sharedNotes = data.notes.filter(note => note.is_share == 1);
                     if (sharedNotes.length > 0) {
-                        const msg = `You have ${sharedNotes.length} notes that have just been shared. <a href="#" id="viewSharedNotes">View Now</a>`;
+                        const msg = `Bạn có ${sharedNotes.length} ghi chú vừa được chia sẻ. <a href="#" id="viewSharedNotes">Xem ngay</a>`;
                         let alertBox = document.createElement('div');
 
                         alertBox.className = 'alert alert-warning mt-3';
@@ -483,16 +487,21 @@
         });
 
         function applyAppearance(mode) {
-        const root = document.documentElement;
-        if (mode === 'dark') {
-            root.classList.add('dark');
-            root.classList.remove('light');
-        } else {
-            root.classList.add('light');
-            root.classList.remove('dark');
+            if (mode === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.body.classList.remove('light-mode');
+            } else {
+                document.body.classList.add('light-mode');
+                document.body.classList.remove('dark-mode');
+            }
         }
-    }
 
+        function getThemeKey() {
+            const email = localStorage.getItem('email') || 'default';
+            return 'themeMode_' + email;
+        }
+
+ 
         const themeKey = getThemeKey();
         const savedMode = localStorage.getItem(themeKey);
         if (savedMode === 'dark') {
@@ -595,7 +604,7 @@
             const shareEmail = document.getElementById('shareEmail').value.trim();
 
             if (email === shareEmail) {
-                alert('Please enter another email to share notes!');
+                alert('Vui lòng nhập email khác để chia sẻ ghi chú!');
                 return;
             }
 
@@ -606,7 +615,7 @@
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success' && !data.is_active) {
-                    alert('You need to activate your account to share notes!');
+                    alert('Bạn cần kích hoạt tài khoản để chia sẻ ghi chú!');
                     return;
                 }
                 // check recipient email exists
@@ -614,7 +623,7 @@
                 .then(res => res.json())
                 .then(userData => {
                     if (userData.status !== 'success') {
-                        alert('Recipient email does not exist!');
+                        alert('Email người nhận không tồn tại!');
                         return;
                     }
                     // check recipient activation
@@ -622,7 +631,7 @@
                     .then(res => res.json())
                     .then(shareEmailData => {
                         if (shareEmailData.status === 'success' && !shareEmailData.is_active) {
-                            alert('Recipient account not activated!');
+                            alert('Tài khoản người nhận chưa được kích hoạt!');
                             return;
                         }
                         
@@ -640,24 +649,24 @@
                         .then(res => res.json())
                         .then (result => {
                             if (result.status === 'success') {
-                                alert('Shared note successfully!');
+                                alert('Chia sẻ ghi chú thành công!');
                                 window.location.reload();
                             } 
                             else {
-                                alert(result.message || 'Share note failed!');
+                                alert(result.message || 'Chia sẻ ghi chú thất bại!');
                             }
                         })
                         .catch(err => {
-                            alert('Error sharing note!');
+                            alert('Lỗi khi chia sẻ ghi chú!');
                             console.log(err);
                         });
                     })
                     .catch(err => {
-                        alert('Error checking recipient activation!');
+                        alert('Lỗi khi kiểm tra kích hoạt người nhận!');
                     });
                 })
                 .catch(err => {
-                    alert('Recipient email does not exist!');
+                    alert('Email người nhận không tồn tại!');
                     console.log(err);
                 });
             });
@@ -688,5 +697,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+</body>
+</html>
+
 </body>
 </html>
