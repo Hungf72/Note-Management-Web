@@ -241,8 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 displayLabels(allLabels);
             }
         });
-    }
-
+    }    
+    
     function createNote(title, content) {
         if (!title) {
             alert('Title is required.');
@@ -250,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const selectedLabels = Array.from(noteLabelsSelect.selectedOptions).map(opt => opt.value);
         const imageFile = document.getElementById('imageUpload').files[0];
+        const passwordEnabled = document.getElementById('enablePasswordProtection').checked;
         const password = document.getElementById('notePassword').value.trim();
 
         const formData = new FormData();
@@ -261,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('image', imageFile);
         }
 
-        if (password) {
+        if (passwordEnabled && password) {
             formData.append('note_password', password);
         }
 
@@ -340,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayNotes(notes) {
         const notesList = document.getElementById('notesList');
         notesList.innerHTML = '';
+        notesList.classList.add('row');
 
         if (notes.length === 0) {
             notesList.innerHTML = '<p class="text-center">No notes found.</p>';
@@ -357,6 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sortedNotes.forEach(note => {
             const pinIconClass = note.is_pinned == 1 ? 'bi bi-pin-angle-fill' : 'bi bi-pin-angle';
             const noteCard = document.createElement('div');
+    
             noteCard.className = `card note-card mb-3 ${note.is_pinned == 1 ? 'pinned-note' : ''}`;
             // Show labels as badges
             let labelBadges = '';
@@ -573,6 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Connection error:', error);
         });
     }    
+
     function updateNote(noteId) {
         const title = document.getElementById('noteTitle').value.trim();
         const content = document.getElementById('noteContent').value.trim();
