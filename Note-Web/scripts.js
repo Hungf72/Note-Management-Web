@@ -466,14 +466,58 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('notesList').addEventListener('click', function(e) {
         if (e.target && e.target.classList.contains('delete-btn')) {
             const noteId = e.target.getAttribute('data-id');
-            deleteNote(noteId);
+            const noteCard = e.target.closest('.note-card');
+            const isPasswordProtected = noteCard.querySelector('.alert-warning');
+            if (isPasswordProtected) {
+                const password = prompt('Enter password to view this note:');
+                if (!password) return;
+                
+                fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'view_protected', id: noteId, password: password })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        deleteNote(noteId);
+                    } else {
+                        alert(data.message || 'Incorrect password.');
+                    }
+                });
+            }
+            else {
+                deleteNote(noteId);
+            }
         }
     });
 
     document.getElementById('notesList').addEventListener('click', function(e) {
         if (e.target && e.target.classList.contains('edit-btn')) {
             const noteId = e.target.getAttribute('data-id');
-            editNote(noteId);
+            const noteCard = e.target.closest('.note-card');
+            const isPasswordProtected = noteCard.querySelector('.alert-warning');
+            if (isPasswordProtected) {
+                const password = prompt('Enter password to view this note:');
+                if (!password) return;
+                
+                fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'view_protected', id: noteId, password: password })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        editNote(noteId, password);
+                    } else {
+                        alert(data.message || 'Incorrect password.');
+                    }
+                });
+            }
+            else {
+                editNote(noteId);
+            }
         }
     });   
 
