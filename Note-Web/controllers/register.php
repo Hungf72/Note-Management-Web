@@ -4,8 +4,7 @@ session_start();
 require_once __DIR__ . '/../models/connect.php';
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {    
     $firstName = trim($_POST['firstname'] ?? '');
     $lastName  = trim($_POST['lastname'] ?? '');
     $age       = $_POST['age'] ?? null;
@@ -32,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-    try {
+    try {        
         $stmt = $pdo->prepare("INSERT INTO users 
             (firstName, lastName, age, phone, email, password, is_active)
             VALUES 
