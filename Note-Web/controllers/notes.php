@@ -368,7 +368,7 @@
             echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
             exit;
         }
-        $stmt = $pdo->prepare("SELECT content, note_password FROM notes WHERE id = :id AND user_id = :user_id");
+        $stmt = $pdo->prepare("SELECT content, note_password, image_path FROM notes WHERE id = :id AND user_id = :user_id");
         $stmt->execute(['id' => $noteId, 'user_id' => $userId]);
         $note = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$note) {
@@ -376,7 +376,7 @@
             exit;
         }
         if ($note['note_password'] === $password) {
-            echo json_encode(['status' => 'success', 'content' => $note['content']]);
+            echo json_encode(['status' => 'success', 'content' => $note['content'], 'image_path' => $note['image_path']]);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Incorrect password.']);
         }
