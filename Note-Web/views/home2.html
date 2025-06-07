@@ -404,19 +404,40 @@
                                     }, 300);
                                 }
                             });
-                        });
-                    }
+                        });                    }
                 }
             });
+            // Hiển thị input password khi checkbox được chọn
+            const passwordCheckbox = document.getElementById('enablePasswordProtection');
+            const passwordInput = document.getElementById('notePassword');
+            
+            if (passwordCheckbox && passwordInput) {
+                if (passwordCheckbox.checked) {
+                    passwordInput.style.display = 'block';
+                    passwordInput.setAttribute('required', 'required');
+                } else {
+                    passwordInput.style.display = 'none';
+                    passwordInput.removeAttribute('required');
+                }
+                
+                passwordCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        passwordInput.style.display = 'block';
+                        passwordInput.setAttribute('required', 'required');
+                    } else {
+                        passwordInput.style.display = 'none';
+                        passwordInput.removeAttribute('required');
+                        passwordInput.value = '';
+                    }
+                });
+            }
         })
 
-        // sidebar active state toggle
         document.querySelectorAll('.sidebar-link').forEach(link => {
             link.addEventListener('click', function() {
                 document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
 
-                // show/hide content based on sidebar selection
                 if (this.id === 'sidebarNotes') {
                     document.querySelector('.Note-Content').style.display = 'block';
                     document.querySelector('.Home-Content').style.display = 'none';
@@ -431,6 +452,30 @@
                     document.querySelector('.sharing-Content').style.display = 'block';
                     document.querySelector('.Note-Content').style.display = 'none';
                     document.querySelector('.Home-Content').style.display = 'none';
+
+                    fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
+                        credentials: 'include'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        const select = document.getElementById('shareNotes');
+                        select.innerHTML = '';
+
+                        if (data.status === 'success' && Array.isArray(data.notes)) {
+                            data.notes.forEach(note => {
+                                const option = document.createElement('option');
+                                option.value = note.id;
+                                option.textContent = note.title;
+                                select.appendChild(option);
+                            });
+                        } 
+                        else {
+                            const option = document.createElement('option');
+                            option.disabled = true;
+                            option.textContent = 'No notes found';
+                            select.appendChild(option);
+                        }
+                    });
                 }
             });
         });
@@ -581,33 +626,6 @@
             }
         }
 
-        // get note to select
-        document.getElementById('sidebarSharing').addEventListener('click', ()=>{
-            fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
-                credentials: 'include'
-            })
-            .then(res => res.json())
-            .then(data => {
-                const select = document.getElementById('shareNotes');
-                select.innerHTML = '';
-
-                if (data.status === 'success' && Array.isArray(data.notes)) {
-                    data.notes.forEach(note => {
-                        const option = document.createElement('option');
-                        option.value = note.id;
-                        option.textContent = note.title;
-                        select.appendChild(option);
-                    });
-                } 
-                else {
-                    const option = document.createElement('option');
-                    option.disabled = true;
-                    option.textContent = 'No notes found';
-                    select.appendChild(option);
-                }
-            });
-        });
-
         // share note submit
         document.getElementById('shareNoteForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -682,14 +700,12 @@
                     console.log(err);
                 });
             });
-        });
-
-        document.getElementById('startWritingLink').addEventListener('click', function(e) {
+        });        document.getElementById('startWritingLink').addEventListener('click', function(e) {
             e.preventDefault();
             document.getElementById('sidebarNotes').click();
         });
 
-        // Hien thi input password khi checkbox duoc chon
+        // Hien thi input password khi checkbox duoc chon (backup event listener)
         document.getElementById('enablePasswordProtection').addEventListener('change', function() {
             const passwordInput = document.getElementById('notePassword');
             if (this.checked) {
