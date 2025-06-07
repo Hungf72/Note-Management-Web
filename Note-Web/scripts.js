@@ -272,11 +272,18 @@ document.addEventListener('DOMContentLoaded', () => {
             body: formData
         })
         .then(response => response.json())
-        .then(data => {
+        .then(data => {            
             if (data.status === 'success') {
                 document.getElementById('noteTitle').value = '';
                 document.getElementById('noteContent').value = '';
                 document.getElementById('imageUpload').value = '';
+                
+                const passwordCheckbox = document.getElementById('enablePasswordProtection');
+                const passwordInput = document.getElementById('notePassword');
+                passwordCheckbox.checked = false;
+                passwordInput.style.display = 'none';
+                passwordInput.removeAttribute('required');
+                
                 fetchNotes();
             } else {
                 alert('Error creating note: ' + data.message);
@@ -565,6 +572,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('noteContent').value = data.note.content;
                 document.getElementById('noteFormBtn').textContent = 'Update Note';
                 document.getElementById('noteFormHeader').textContent = 'Edit Note';
+                document.getElementById('imageUpload').value = ''; 
+                const passwordCheckbox = document.getElementById('enablePasswordProtection');
+                const passwordInput = document.getElementById('notePassword');
+                passwordCheckbox.checked = false;
+                passwordInput.style.display = 'none';
+                passwordInput.removeAttribute('required');
+                
                 fetchLabelsAndUpdateSelect();
                 setSelectedLabels(data.note.labels ? data.note.labels.map(Number) : []);
                 document.getElementById("noteForm").setAttribute("data-id", noteId);
@@ -616,6 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('noteTitle').value = '';
                 document.getElementById('noteContent').value = '';
                 document.getElementById('noteFormBtn').textContent = 'Create Note';
+                document.getElementById('imageUpload').value = '';
                 fetchNotes();
             } else {
                 alert('Error updating note: ' + data.message);
