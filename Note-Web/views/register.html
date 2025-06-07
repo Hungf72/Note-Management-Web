@@ -125,7 +125,7 @@
 
 
   <script>
-    setTimeout(() => {
+  function showModal() {
     const modal = document.getElementById('modal');
     const content = document.getElementById('modalContent');
 
@@ -134,7 +134,7 @@
       content.classList.remove('opacity-0', 'translate-y-[-20px]');
       content.classList.add('opacity-100', 'translate-y-0');
     }, 50); 
-  }, 5000);
+  }
 
   function closeModal() {
     const modal = document.getElementById('modal');
@@ -165,16 +165,18 @@
 
     document.getElementById("toggleConfirm").addEventListener("click", () => {
       toggle("confirmPassword", "eyeOpen2", "eyeSlash2");
-    });
-
+    });    
+    
     // Sửa lại show/hide modal cho đúng id
     function showModal(message) {
       document.getElementById('modalMessage').textContent = message;
-      document.getElementById('modal').classList.remove('hidden');
+      const modal = document.getElementById('modal');
+      const content = document.getElementById('modalContent');
+      
+      modal.classList.remove('hidden');
+      content.classList.remove('opacity-0', 'translate-y-[-20px]');
+      content.classList.add('opacity-100', 'translate-y-0');
     }
-    document.getElementById('closeModalBtn').onclick = function() {
-      document.getElementById('modal').classList.add('hidden');
-    };
 
     document.getElementById("registerForm").addEventListener("submit", function(e) {
         e.preventDefault();
