@@ -125,12 +125,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     saveNewLabelBtn.addEventListener('click', () => {
-        if (isEditingLabels) return; 
-
+        if (isEditingLabels) return;        
         const name = newLabelName.value.trim();
         if (!name) return;
         fetch('/Note-Management-Web/Note-Web/controllers/labels.php', {
             method: 'POST',
+            credentials: 'include',
             headers: { 
                 'Content-Type': 'application/x-www-form-urlencoded' 
             },
@@ -230,10 +230,11 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.error('Error renaming label:', err));
         }
     }
-
-
     function fetchLabels() {
-        fetch('/Note-Management-Web/Note-Web/controllers/labels.php', { method: 'GET' })
+        fetch('/Note-Management-Web/Note-Web/controllers/labels.php', { 
+            method: 'GET',
+            credentials: 'include'
+        })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
@@ -260,15 +261,14 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('action', 'create');
         if (imageFile) {
             formData.append('image', imageFile);
-        }
-
-        if (passwordEnabled.checked && password) {
+        }        if (passwordEnabled.checked && password) {
             formData.append('note_password', password);
         }
 
 
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
             method: 'POST',
+            credentials: 'include',
             body: formData
         })
         .then(response => response.json())
@@ -277,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('noteTitle').value = '';
                 document.getElementById('noteContent').value = '';
                 document.getElementById('imageUpload').value = '';
+                document.getElementById('notePassword').value = '';
                 
                 const passwordCheckbox = document.getElementById('enablePasswordProtection');
                 const passwordInput = document.getElementById('notePassword');
@@ -292,11 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => {
             console.error('Connection error:', error);
         });
-    }
-
-    function fetchNotes() {
+    }    function fetchNotes() {
         fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
-            method: 'GET' 
+            method: 'GET',
+            credentials: 'include'
         })
         .then(response => response.json())
         .then(data => {
@@ -366,8 +366,10 @@ document.addEventListener('DOMContentLoaded', () => {
         sortedNotes.forEach(note => {
             const pinIconClass = note.is_pinned == 1 ? 'bi bi-pin-angle-fill' : 'bi bi-pin-angle';
             const noteCard = document.createElement('div');
+            noteCard.className = 'col-md-4 col-sm-6 mb-4';
     
             noteCard.className = `card note-card mb-3 ${note.is_pinned == 1 ? 'pinned-note' : ''}`;
+
             // Show labels as badges
             let labelBadges = '';
             if (note.labels && note.labels.length) {
@@ -376,15 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     return label ? `<span class='badge badge-info mr-1'>${label.name}</span>` : '';
                 }).join('');
             }
-            let imageHtml = '';
-            if (note.image_path) {
-                const imagePath = '/Note-Management-Web/Note-Web/' + note.image_path;
-                imageHtml = `
-                    <div class="mb-3">
-                        <img src="${imagePath}" alt="Note image" class="img-fluid rounded" style="max-height: 200px;" onerror="this.style.display='none'">
-                    </div>`;
-            }
             let contentHtml = '';
+            let imageHtml = '';
             if (note.note_password && note.note_password.length > 0) {
                 contentHtml = `
                     <div class="alert alert-warning">
@@ -393,8 +388,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn btn-sm btn-outline-primary view-protected-btn" data-id="${note.id}">View</button>
                     <div class="protected-content mt-2" style="display:none;"></div>
                 `;
-            } else {
+            } 
+            else {
                 contentHtml = `<p class="card-text">${note.content || ''}</p>`;
+                if (note.image_path) {
+                    const imagePath = '/Note-Management-Web/Note-Web/' + note.image_path;
+                    imageHtml = `
+                        <div class="mb-3">
+                            <img src="${imagePath}" alt="Note image" class="img-fluid rounded" style="max-height: 200px;" onerror="this.style.display='none'">
+                        </div>`;
+                }
             }
             noteCard.innerHTML = `
                 <div class="card-body">
@@ -420,6 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const noteId = this.getAttribute('data-id');
                 const password = prompt('Enter password to view this note:');
                 const protectedContentDiv = this.parentElement.querySelector('.protected-content');
+                const passwordWarning = this.parentElement.querySelector('.alert-warning');
                 fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -428,12 +432,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        protectedContentDiv.innerHTML = `<p class='card-text'>${data.content}</p>`;
+                        let contentHtml = ``;
+
+                        if (data.image_path) {
+                            const imagePath = '/Note-Management-Web/Note-Web/' + data.image_path;
+                            contentHtml += `
+                                <div class="mb-3">
+                                    <img src="${imagePath}" alt="Note image" class="img-fluid rounded" style="max-height: 200px;" onerror="this.style.display='none'">
+                                </div>`;
+                        }
+
+                        contentHtml += `<p class="card-text">${data.content || ''}</p>`;
+                        
+                        protectedContentDiv.innerHTML = contentHtml;
                         protectedContentDiv.style.display = 'block';
+                        passwordWarning.style.display = 'none';
                         this.style.display = 'none';
                     } else {
                         alert(data.message || 'Incorrect password.');
                     }
+                })
+                .catch(error => {
+                    console.error('Error viewing protected note:', error);
+                    alert('An error occurred while viewing the note.');
                 });
             });
         });
@@ -572,7 +593,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('noteContent').value = data.note.content;
                 document.getElementById('noteFormBtn').textContent = 'Update Note';
                 document.getElementById('noteFormHeader').textContent = 'Edit Note';
-                document.getElementById('imageUpload').value = ''; 
+                document.getElementById('imageUpload').value = '';
+                document.getElementById('notePassword').value = ''; 
                 const passwordCheckbox = document.getElementById('enablePasswordProtection');
                 const passwordInput = document.getElementById('notePassword');
                 passwordCheckbox.checked = false;
