@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($avatarPath) {
                 $_SESSION['user']['avatar'] = $avatarPath;
             }
-            echo json_encode(["status" => "success", "message" => "Cập nhật thành công", "avatar" => $avatarPath]);
+            echo json_encode(["status" => "success", "message" => "Update successfull.", "avatar" => $avatarPath]);
         } 
         else {
             echo json_encode(["status" => "error", "message" => "Cập nhật thất bại"]);
