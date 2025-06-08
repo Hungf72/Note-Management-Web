@@ -80,7 +80,7 @@
 
       <input type="number" placeholder="Age" class="input-style" min="1" step="1" required />
 
-      <input type="text" placeholder="Phone Number" class="input-style" pattern="^\d{8,}$" required />
+      <input type="text" placeholder="Phone Number" class="input-style" pattern="^\d{10}$" required />
 
       <input type="email" placeholder="Email" class="input-style" required />
 
@@ -167,7 +167,7 @@
       toggle("confirmPassword", "eyeOpen2", "eyeSlash2");
     });    
     
-    // Sửa lại show/hide modal cho đúng id
+  
     function showModal(message) {
       document.getElementById('modalMessage').textContent = message;
       const modal = document.getElementById('modal');
