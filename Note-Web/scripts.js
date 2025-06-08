@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labelsList.innerHTML = '';
         labels.forEach(label => {
             const li = document.createElement('li');
-            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.className = 'label-item list-group-item d-flex justify-content-between align-items-center';
             li.innerHTML = `
                 <span class="label-name" data-id="${label.id}">${label.name}</span>
                 <div>
