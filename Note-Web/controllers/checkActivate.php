@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     else {
         echo json_encode([
             'status' => 'error',
-            'message' => 'Không tìm thấy tài khoản.'
+            'message' => 'Account not found.'
         ]);
     }
 }
