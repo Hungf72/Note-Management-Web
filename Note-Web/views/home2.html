@@ -25,6 +25,9 @@
     }
     </script>
        <style>
+        html.light #userName {
+        color: white !important;
+        }
         html.light .sidebar {
             background-color: #343a40;
             color: white;
@@ -319,6 +322,15 @@
 <script>
 
         document.addEventListener('DOMContentLoaded',()=>{
+            // Load and apply saved theme preference
+            const themeKey = getThemeKey();
+            const savedMode = localStorage.getItem(themeKey);
+            if (savedMode) {
+                selectAppearance(savedMode);
+            } else {
+                selectAppearance('light');
+            }
+
             // active account
             fetch(`/Note-Management-Web/Note-Web/controllers/checkActivate.php?email=${encodeURIComponent(localStorage.getItem('email'))}`)
             .then(res => res.json())
@@ -492,9 +504,16 @@
         document.getElementById("logOut").addEventListener("click", function(e) {
             e.preventDefault();
 
+            // Save the current theme preference
+            const currentThemeKey = getThemeKey();
+            const currentThemeMode = localStorage.getItem(currentThemeKey);
+            
             localStorage.removeItem("email");
             localStorage.removeItem("is_activated");
-
+            
+            if (currentThemeMode) {
+                localStorage.setItem('themeMode_default', currentThemeMode);
+            }
             const userName = document.getElementById("userName")
 
             if (userName) {
