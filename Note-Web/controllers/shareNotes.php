@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$recipient) {
-        echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy người nhận.']);
+        echo json_encode(['status' => 'error', 'message' => 'Recipient not found.']);
         exit;
     }
 
