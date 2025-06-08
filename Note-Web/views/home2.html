@@ -342,7 +342,7 @@
                 const msgBox = document.getElementById('activationMsg');
                 if (data.status === 'success' && !data.is_active) {
                     const link = localStorage.getItem('activation_link');
-                    msgBox.innerHTML = `Tài khoản của bạn chưa được kích hoạt. Nhấn <a href="${link}" target="_blank">vào đây để kích hoạt</a>.`;
+                    msgBox.innerHTML = `Your account are not active. Press <a href="${link}" target="_blank">here to activate.</a>.`;
                     msgBox.style.display = 'block';
                 } 
                 else {
@@ -394,7 +394,7 @@
                 if (data.status === 'success' && Array.isArray(data.notes)) {
                     const sharedNotes = data.notes.filter(note => note.is_share == 1);
                     if (sharedNotes.length > 0) {
-                        const msg = `Bạn có ${sharedNotes.length} ghi chú vừa được chia sẻ. <a href="#" id="viewSharedNotes">Xem ngay</a>`;
+                        const msg = `You have ${sharedNotes.length} been received a shared note.<a href="#" id="viewSharedNotes"> Check now.</a>`;
                         let alertBox = document.createElement('div');
 
                         alertBox.className = 'alert alert-warning mt-3';
