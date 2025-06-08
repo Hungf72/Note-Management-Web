@@ -19,12 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         echo json_encode([
             'status' => 'success',
-            'message' => 'Kích hoạt tài khoản thành công! Bạn có thể tiếp tục.',
+            'message' => 'Activation successful! Your account is now active.',
         ]);
     } else {
         echo json_encode([
             'status' => 'error',
-            'message' => 'Mã kích hoạt không hợp lệ hoặc tài khoản đã được kích hoạt.'
+            'message' => 'Reset code is invalid.',
         ]);
     }
 }
