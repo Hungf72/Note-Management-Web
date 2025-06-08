@@ -503,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const noteId = e.target.getAttribute('data-id');
             const noteCard = e.target.closest('.note-card');
             const isPasswordProtected = noteCard.querySelector('.alert-warning');
-            const warningDiv = this.parentElement.querySelector('.alert-warning');
+            const warningDiv = noteCard.querySelector('.alert-warning');
             if (isPasswordProtected) {
                 const password = prompt('Enter password to view this note:');
                 if (!password) return;
@@ -534,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const noteId = e.target.getAttribute('data-id');
             const noteCard = e.target.closest('.note-card');
             const isPasswordProtected = noteCard.querySelector('.alert-warning');
-            const warningDiv = this.parentElement.querySelector('.alert-warning');
+            const warningDiv = noteCard.querySelector('.alert-warning');
             if (isPasswordProtected) {
                 const password = prompt('Enter password to view this note:');
                 if (!password) return;
