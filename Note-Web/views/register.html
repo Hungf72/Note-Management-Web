@@ -221,6 +221,8 @@
             if (data.status === "success") {
                 localStorage.setItem('activation_link', data.activation_link);
                 localStorage.setItem('email',data.email);
+                // set theme mode to light
+                localStorage.setItem('themeMode_' + data.email, 'light');
                 setTimeout(() => {
                     window.location.href = "home2.html";
                 }, 1000);
