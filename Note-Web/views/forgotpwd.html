@@ -150,29 +150,26 @@
 
 
   <script>
-    setTimeout(() => {
-    const modal = document.getElementById('modal');
-    const content = document.getElementById('modalContent');
-
-    modal.classList.remove('hidden');
-    setTimeout(() => {
-      content.classList.remove('opacity-0', 'translate-y-[-20px]');
-      content.classList.add('opacity-100', 'translate-y-0');
-    }, 50); 
-  }, 5000);
-
-  function closeModal() {
-    const modal = document.getElementById('modal');
-    const content = document.getElementById('modalContent');
-
     
-    content.classList.remove('opacity-100', 'translate-y-0');
-    content.classList.add('opacity-0', 'translate-y-[-20px]');
-    
-    setTimeout(() => {
-      modal.classList.add('hidden');
-    }, 500);
-  }
+    function showModal() {
+      const modal = document.getElementById('modal');
+      const content = document.getElementById('modalContent');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        content.classList.remove('opacity-0', 'translate-y-[-20px]');
+        content.classList.add('opacity-100', 'translate-y-0');
+      }, 50);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('modal');
+      const content = document.getElementById('modalContent');
+      content.classList.remove('opacity-100', 'translate-y-0');
+      content.classList.add('opacity-0', 'translate-y-[-20px]');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 500);
+    }
         const toggle = (inputId, openId, slashId) => {
             const input = document.getElementById(inputId);
             const eyeOpen = document.getElementById(openId);
@@ -195,108 +192,92 @@
 
         // gui ma yeu cau
         document.getElementById('forgotForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const modalMessage = document.getElementById('modalMessage');
-
-            fetch('/Note-Management-Web/Note-Web/controllers/forgotpwd.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "success") {
-                    generatedCode = data.ecode;
-
-                    modalMessage.innerHTML = `
-                        <span class="text-success">${data.message}</span>
-                        <strong> ${generatedCode}</strong><br>
-                        <small class="text-muted">⚠️ Code is valid for 5 minutes.</small>
-                    `;
-
-                    document.getElementById("confirmMessage").style.display = 'block';
-                    document.getElementById("btnVerify").style.display = 'block';
-                    document.getElementById("btnSendLink").style.display = 'none';
-
-                    document.getElementById("email").readOnly = true;
-                } 
-                else{
-                    modalMessage.innerHTML = `<span class="text-danger">${data.message}</span>`;
-                }
-
-                document.getElementById("modal").classList.remove('hidden');
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                modalMessage.innerHTML = `<span class="text-danger">An error occurred while sending the request.</span>`;
-                document.getElementById("modal").classList.remove('hidden');
-            });
+          e.preventDefault();
+          const formData = new FormData(this);
+          const modalMessage = document.getElementById('modalMessage');
+          fetch('/Note-Management-Web/Note-Web/controllers/forgotpwd.php', {
+            method: 'POST',
+            body: formData
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === "success") {
+              generatedCode = data.ecode;
+              modalMessage.innerHTML = `
+                <span class="text-success">${data.message}</span>
+                <strong> ${generatedCode}</strong><br>
+                <small class="text-muted">⚠️ Code is valid for 5 minutes.</small>
+              `;
+              document.getElementById("confirmMessage").classList.remove('hidden');
+              document.getElementById("btnVerify").classList.remove('hidden');
+              document.getElementById("btnSendLink").classList.add('hidden');
+              document.getElementById("email").readOnly = true;
+            } else {
+              modalMessage.innerHTML = `<span class="text-danger">${data.message}</span>`;
+            }
+            showModal();
+          })
+          .catch(err => {
+            console.error('Error:', err);
+            modalMessage.innerHTML = `<span class="text-danger">An error occurred while sending the request.</span>`;
+            showModal();
+          });
         });
 
         //kiem tra ma xac nhan
         document.getElementById('verifyCodeBtn').addEventListener('click', function () {
-            const enteredCode = document.getElementById('confirmCode').value.trim();
-            const modalMessage = document.getElementById('modalMessage');
-
-            if (enteredCode === generatedCode) {
-                modalMessage.innerHTML = `<span class="text-success">✅ The confirmation code is correct! You can continue to reset your password.</span>`;
-
-                document.getElementById("forgotContainer").style.display = "none";
-                document.getElementById("resetContainer").style.display = "block";
-
-                const email = document.getElementById('email').value;
-                document.getElementById('resetEmail').value = email;
-                document.getElementById('resetEmail').readOnly = true;
-            } 
-            else{
-                modalMessage.innerHTML = `<span class="text-danger">❌ The verification code is incorrect. Please check again.</span>`;
-            }
-            document.getElementById("modal").classList.remove('hidden');
+          const enteredCode = document.getElementById('confirmCode').value.trim();
+          const modalMessage = document.getElementById('modalMessage');
+          if (enteredCode === generatedCode) {
+            modalMessage.innerHTML = `<span class="text-success">✅ The confirmation code is correct! You can continue to reset your password.</span>`;
+            document.getElementById("forgotContainer").classList.add('hidden');
+            document.getElementById("resetContainer").classList.remove('hidden');
+            document.getElementById("resetContainer").style.display = '';
+            const email = document.getElementById('email').value;
+            document.getElementById('resetEmail').value = email;
+            document.getElementById('resetEmail').readOnly = true;
+          } else {
+            modalMessage.innerHTML = `<span class="text-danger">❌ The verification code is incorrect. Please check again.</span>`;
+          }
+          showModal();
         });
 
         // thay doi mat khau
         document.getElementById("resetForm").addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const email = this.querySelector("#resetEmail").value.trim();
-            const password = this.querySelector("#password").value.trim();
-            const confirmPassword = this.querySelector("#confirmPassword").value.trim();
-            const modalMessage = document.getElementById('modalMessage');
-
-            if (password !== confirmPassword) {
-                modalMessage.innerHTML = '<span class="text-danger">❌ Confirmation password does not match.</span>';
-                document.getElementById("modal").classList.remove('hidden');
-                return;
+          e.preventDefault();
+          const email = this.querySelector("#resetEmail").value.trim();
+          const password = this.querySelector("#password").value.trim();
+          const confirmPassword = this.querySelector("#confirmPassword").value.trim();
+          const modalMessage = document.getElementById('modalMessage');
+          if (password !== confirmPassword) {
+            modalMessage.innerHTML = '<span class="text-danger">❌ Confirmation password does not match.</span>';
+            showModal();
+            return;
+          }
+          const formData = new FormData();
+          formData.append('email', email);
+          formData.append('password', password);
+          fetch('/Note-Management-Web/Note-Web/controllers/updatepwd.php', {
+            method: 'POST',
+            body: formData
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === 'success') {
+              modalMessage.innerHTML = `<span class="text-success">${data.message}</span>`;
+              setTimeout(() => {
+                window.location.href = "login.html";
+              }, 1000);
+            } else {
+              modalMessage.innerHTML = `<span class="text-danger">${data.message}</span>`;
             }
-
-            const formData = new FormData();
-            formData.append('email', email);
-            formData.append('password', password);
-
-            fetch('/Note-Management-Web/Note-Web/controllers/updatepwd.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    modalMessage.innerHTML = `<span class="text-success">${data.message}</span>`;
-                   
-                    setTimeout(() => {
-                        window.location.href = "login.html";
-                    }, 1000);
-                } 
-                else {
-                    modalMessage.innerHTML = `<span class="text-danger">${data.message}</span>`;
-                }
-                document.getElementById("modal").classList.remove('hidden');
-            })
-            .catch(err => {
-                console.error('Lỗi:', err);
-                modalMessage.innerHTML = '<span class="text-danger">An error occurred while updating password.</span>';
-                document.getElementById("modal").classList.remove('hidden');
-            });
+            showModal();
+          })
+          .catch(err => {
+            console.error('Lỗi:', err);
+            modalMessage.innerHTML = '<span class="text-danger">An error occurred while updating password.</span>';
+            showModal();
+          });
         });
 
     </script>
