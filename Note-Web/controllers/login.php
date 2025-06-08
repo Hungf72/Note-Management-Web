@@ -27,10 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            echo json_encode(['status' => 'success', 'message' => 'Đăng nhập thành công', 'email' => $email]);
+            echo json_encode(['status' => 'success', 'message' => 'Login successfull.', 'email' => $email]);
         } 
         else{
-            echo json_encode(['status' => 'error', 'message' => 'Email hoặc mật khẩu không đúng.']);
+            echo json_encode(['status' => 'error', 'message' => 'Email or password is incorrect!']);
         }
     } 
     catch (PDOException $e){
