@@ -385,6 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="alert alert-warning">
                         <i class="fas fa-lock mr-2"></i> This note is password protected.
                     </div>
+                    <div class="alert alert-warning" style="display:none;">Incorrect password.</div>
                     <button class="btn btn-sm btn-outline-primary view-protected-btn" data-id="${note.id}">View</button>
                     <div class="protected-content mt-2" style="display:none;"></div>
                 `;
@@ -424,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const password = prompt('Enter password to view this note:');
                 const protectedContentDiv = this.parentElement.querySelector('.protected-content');
                 const passwordWarning = this.parentElement.querySelector('.alert-warning');
+                const warningDiv = this.parentElement.querySelector('.alert-warning');
                 fetch('/Note-Management-Web/Note-Web/controllers/notes.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -449,7 +451,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         passwordWarning.style.display = 'none';
                         this.style.display = 'none';
                     } else {
-                        alert(data.message || 'Incorrect password.');
+                        protectedContentDiv.innerHTML = '';
+                        warningDiv.textContent = data.message || 'Incorrect password.';
+                        warningDiv.style.display = 'block';
                     }
                 })
                 .catch(error => {
@@ -499,6 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const noteId = e.target.getAttribute('data-id');
             const noteCard = e.target.closest('.note-card');
             const isPasswordProtected = noteCard.querySelector('.alert-warning');
+            const warningDiv = this.parentElement.querySelector('.alert-warning');
             if (isPasswordProtected) {
                 const password = prompt('Enter password to view this note:');
                 if (!password) return;
@@ -513,7 +518,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.status === 'success') {
                         deleteNote(noteId);
                     } else {
-                        alert(data.message || 'Incorrect password.');
+                        warningDiv.textContent = data.message || 'Incorrect password.';
+                        warningDiv.style.display = 'block';
                     }
                 });
             }
@@ -528,6 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const noteId = e.target.getAttribute('data-id');
             const noteCard = e.target.closest('.note-card');
             const isPasswordProtected = noteCard.querySelector('.alert-warning');
+            const warningDiv = this.parentElement.querySelector('.alert-warning');
             if (isPasswordProtected) {
                 const password = prompt('Enter password to view this note:');
                 if (!password) return;
@@ -542,7 +549,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.status === 'success') {
                         editNote(noteId, password);
                     } else {
-                        alert(data.message || 'Incorrect password.');
+                        warningDiv.textContent = data.message || 'Incorrect password.';
+                        warningDiv.style.display = 'block';
                     }
                 });
             }
